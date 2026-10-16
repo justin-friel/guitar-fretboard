@@ -1,29 +1,81 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Interactive Guitar Fretboard Notes</title>
+<title>Interactive Guitar Fretboard</title>
 <style>
-:root{color-scheme:light dark;font-family:system-ui,-apple-system,sans-serif}body{max-width:1100px;margin:32px auto;padding:0 16px}h1{font-size:1.4rem}p{color:gray}.scroll{overflow-x:auto}table{border-collapse:separate;border-spacing:3px;width:100%;min-width:740px;text-align:center}th{font-size:.85rem}td button{width:100%;min-width:42px;height:42px;border:1px solid #9996;border-radius:5px;background:Canvas;color:CanvasText;cursor:pointer;font:inherit}td button:hover,td button:focus-visible{outline:2px solid #388dd6}td button[aria-pressed="true"]{background:#246cb3;color:white;font-weight:700}td.open button{background:color-mix(in srgb,CanvasText 8%,Canvas)}td.open button[aria-pressed="true"]{background:#246cb3}#result{font-size:1.25rem;font-weight:650;margin:20px 0}small{color:gray}
+:root{color-scheme:light dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f7f7f7;color:#202124}
+*{box-sizing:border-box}
+body{margin:0;padding:clamp(12px,3vw,32px)}
+main{max-width:1050px;margin:auto}
+h1{font-size:clamp(1.35rem,3vw,2rem);margin:0 0 .35rem}
+p{line-height:1.5;color:#555}
+.toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:20px 0 12px}
+.toolbar label{display:flex;align-items:center;gap:8px;cursor:pointer}
+input{width:20px;height:20px;accent-color:#285db3}
+.scroller{overflow-x:auto;border:1px solid #c8cbd0;border-radius:9px;background:white}
+.fretboard{display:grid;grid-template-columns:60px repeat(13,minmax(47px,1fr));min-width:710px}
+.cell{min-height:49px;display:flex;align-items:center;justify-content:center;border-right:1px solid #d9dce0;border-bottom:1px solid #d9dce0}
+.label{font-weight:700;background:#f0f2f5;position:sticky;left:0;z-index:1}
+.heading{font-size:.8rem;background:#f0f2f5;color:#4e535c}
+.note{display:block;width:100%;min-height:49px;border:0;background:transparent;color:#202124;font:600 .88rem system-ui;cursor:pointer}
+.note:hover{background:#e8effb}
+.note[aria-pressed="true"]{background:#d6e6ff;outline:2px solid #285db3;outline-offset:-2px}
+.note:focus-visible{outline:3px solid #285db3;outline-offset:-3px}
+.details{margin-top:16px;padding:18px;border:1px solid #c8cbd0;border-radius:9px;background:white}
+.details small{display:block;color:#5a6069;text-transform:uppercase;letter-spacing:.07em}
+#selected-note{font-size:1.45rem;font-weight:700;margin:6px 0}
+#selected-position{color:#555}
+footer{font-size:.85rem;margin-top:16px}
+@media(prefers-color-scheme:dark){:root{background:#15171a;color:#e8eaed}.scroller,.details{background:#202328;border-color:#4b5058}.cell{border-color:#41464d}.label,.heading{background:#2c3036;color:#d6d8dc}.note{color:#e8eaed}.note:hover{background:#303f57}.note[aria-pressed="true"]{background:#24436c;outline-color:#87b5ff}p,#selected-position,footer{color:#b9bec6}.details small{color:#b9bec6}}
 </style>
 </head>
 <body>
-<h1>Guitar fretboard note chart</h1>
-<p>Standard tuning (E A D G B E). Fret 0 is an open string. Click any note.</p>
-<div id="result" role="status" aria-live="polite">Selected: E — low E string, fret 0</div>
-<div class="scroll"><table id="fretboard"><thead><tr><th scope="col">String</th></tr></thead><tbody></tbody></table></div>
-<p><small>Top row: thinnest string. Bottom row: thickest string. Sharps shown; no octave numbers.</small></p>
+<main>
+<h1>Interactive Guitar Fretboard</h1>
+<p>Standard tuning · E A D G B E · Frets 0–12</p>
+<div class="toolbar"><span>Tap a note to see its frequency and position.</span><label><input id="use-sharps" type="checkbox" checked>Show sharps instead of flats</label></div>
+<div class="scroller"><div id="fretboard" class="fretboard" aria-label="Guitar fretboard"></div></div>
+<section class="details" aria-live="polite"><small>Selected note</small><div id="selected-note">E2 · 82.41 Hz</div><div id="selected-position">Low E string · open</div></section>
+<footer>Each fret raises the pitch by one semitone. Fret 12 is one octave above the open string (twice its frequency). Frequencies use A4 = 440 Hz.</footer>
+</main>
 <script>
 'use strict';
-const names=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
-const strings=[['e',4,'high e'],['B',11,'B'],['G',7,'G'],['D',2,'D'],['A',9,'A'],['E',4,'low E']];
-const table=document.querySelector('#fretboard');
-const head=table.tHead.rows[0];
-for(let fret=0;fret<=12;fret++){const th=document.createElement('th');th.scope='col';th.textContent=fret;head.append(th)}
-const tbody=table.tBodies[0];let selected;
-strings.forEach(([label,base,description])=>{const tr=tbody.insertRow();const th=document.createElement('th');th.scope='row';th.textContent=label;tr.append(th);for(let fret=0;fret<=12;fret++){const td=tr.insertCell();if(fret===0)td.className='open';const button=document.createElement('button');const note=names[(base+fret)%12];button.type='button';button.textContent=note;button.setAttribute('aria-label',`${description} string, fret ${fret}, note ${note}`);button.setAttribute('aria-pressed','false');button.addEventListener('click',()=>{if(selected)selected.setAttribute('aria-pressed','false');selected=button;button.setAttribute('aria-pressed','true');document.querySelector('#result').textContent=`Selected: ${note} — ${description} string, fret ${fret}`});td.append(button)}});
-const initial=tbody.rows[5].cells[1].firstElementChild;initial.click();
+const sharps=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const flats=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
+const strings=[{label:'High e',midi:64},{label:'B',midi:59},{label:'G',midi:55},{label:'D',midi:50},{label:'A',midi:45},{label:'Low E',midi:40}];
+const board=document.getElementById('fretboard');
+const toggle=document.getElementById('use-sharps');
+const selectedNote=document.getElementById('selected-note');
+const selectedPosition=document.getElementById('selected-position');
+let selected={stringIndex:5,fret:0};
+function nameOf(midi){return (toggle.checked?sharps:flats)[midi%12]+(Math.floor(midi/12)-1);}
+function addCell(text,classes){const cell=document.createElement('div');cell.className='cell '+classes;cell.textContent=text;board.appendChild(cell);return cell;}
+function render(){
+ board.replaceChildren();
+ addCell('String','label heading');
+ for(let fret=0;fret<=12;fret++)addCell(fret===0?'Open':String(fret),'heading');
+ strings.forEach((string,stringIndex)=>{
+  addCell(string.label,'label');
+  for(let fret=0;fret<=12;fret++){
+   const cell=addCell('','');
+   const button=document.createElement('button');
+   button.type='button';button.className='note';button.textContent=nameOf(string.midi+fret);
+   button.setAttribute('aria-label',`${string.label} string, fret ${fret}, ${button.textContent}`);
+   button.setAttribute('aria-pressed',String(selected.stringIndex===stringIndex&&selected.fret===fret));
+   button.addEventListener('click',()=>{selected={stringIndex,fret};render();});
+   cell.appendChild(button);
+  }
+ });
+ const string=strings[selected.stringIndex];
+ const midi=string.midi+selected.fret;
+ const frequency=440*Math.pow(2,(midi-69)/12);
+ selectedNote.textContent=`${nameOf(midi)} · ${frequency.toFixed(2)} Hz`;
+ selectedPosition.textContent=`${string.label} string · ${selected.fret===0?'open':`fret ${selected.fret}`}`;
+}
+toggle.addEventListener('change',render);
+render();
 </script>
 </body>
 </html>
