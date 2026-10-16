@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive Guitar Fretboard Notes</title>
+<style>
+:root{color-scheme:light dark;font-family:system-ui,-apple-system,sans-serif}body{max-width:1100px;margin:32px auto;padding:0 16px}h1{font-size:1.4rem}p{color:gray}.scroll{overflow-x:auto}table{border-collapse:separate;border-spacing:3px;width:100%;min-width:740px;text-align:center}th{font-size:.85rem}td button{width:100%;min-width:42px;height:42px;border:1px solid #9996;border-radius:5px;background:Canvas;color:CanvasText;cursor:pointer;font:inherit}td button:hover,td button:focus-visible{outline:2px solid #388dd6}td button[aria-pressed="true"]{background:#246cb3;color:white;font-weight:700}td.open button{background:color-mix(in srgb,CanvasText 8%,Canvas)}td.open button[aria-pressed="true"]{background:#246cb3}#result{font-size:1.25rem;font-weight:650;margin:20px 0}small{color:gray}
+</style>
+</head>
+<body>
+<h1>Guitar fretboard note chart</h1>
+<p>Standard tuning (E A D G B E). Fret 0 is an open string. Click any note.</p>
+<div id="result" role="status" aria-live="polite">Selected: E — low E string, fret 0</div>
+<div class="scroll"><table id="fretboard"><thead><tr><th scope="col">String</th></tr></thead><tbody></tbody></table></div>
+<p><small>Top row: thinnest string. Bottom row: thickest string. Sharps shown; no octave numbers.</small></p>
+<script>
+'use strict';
+const names=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const strings=[['e',4,'high e'],['B',11,'B'],['G',7,'G'],['D',2,'D'],['A',9,'A'],['E',4,'low E']];
+const table=document.querySelector('#fretboard');
+const head=table.tHead.rows[0];
+for(let fret=0;fret<=12;fret++){const th=document.createElement('th');th.scope='col';th.textContent=fret;head.append(th)}
+const tbody=table.tBodies[0];let selected;
+strings.forEach(([label,base,description])=>{const tr=tbody.insertRow();const th=document.createElement('th');th.scope='row';th.textContent=label;tr.append(th);for(let fret=0;fret<=12;fret++){const td=tr.insertCell();if(fret===0)td.className='open';const button=document.createElement('button');const note=names[(base+fret)%12];button.type='button';button.textContent=note;button.setAttribute('aria-label',`${description} string, fret ${fret}, note ${note}`);button.setAttribute('aria-pressed','false');button.addEventListener('click',()=>{if(selected)selected.setAttribute('aria-pressed','false');selected=button;button.setAttribute('aria-pressed','true');document.querySelector('#result').textContent=`Selected: ${note} — ${description} string, fret ${fret}`});td.append(button)}});
+const initial=tbody.rows[5].cells[1].firstElementChild;initial.click();
+</script>
+</body>
+</html>
