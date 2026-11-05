@@ -6,21 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Interactive Guitar Fretboard</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
+    <script type="module" src="script.js" defer></script>
 </head>
 
 <body>
     <main>
         <h1>Interactive Guitar Fretboard</h1>
         <p>Standard tuning · E A D G B E</p>
-        <div class="toolbar"><span>Tap a note to see its frequency and position.</span><label><input id="use-sharps"
-                    type="checkbox" checked>Show sharps instead of flats</label></div>
+        <div class="toolbar"><span>Tap a note to see its frequency and position.</span>
+            <label>
+                <input id="use-sharps" type="checkbox" checked>
+                Show sharps instead of flats
+            </label>
+        </div>
         <div class="scroller">
             <div id="fretboard" class="fretboard" aria-label="Guitar fretboard"></div>
         </div>
         <section class="details" aria-live="polite"><small>Selected note</small>
-            <div id="selected-note">E2 · 82.41 Hz</div>
-            <div id="selected-position">Low E string · open</div>
+            <div id="selected-note"></div>
+            <div id="selected-position"></div>
         </section>
         <footer>Each fret raises the pitch by one semitone. Fret 12 is one octave above the open string (twice its
             frequency). Frequencies use A4 = 440 Hz.</footer>
