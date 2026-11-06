@@ -130,11 +130,36 @@ input {
 }
 
 .details {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    justify-content: center;
+    gap: 24px 48px;
     margin-top: 16px;
     padding: 18px;
     border: 1px solid #c8cbd0;
     border-radius: 9px;
     background: white
+}
+
+.related-details {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 16px;
+    margin: 10px 0 0;
+}
+
+.related-details dt {
+    font-weight: 600;
+}
+
+.related-details dd {
+    margin: 0;
+}
+
+@media (max-width: 600px) {
+    .details {
+        grid-template-columns: minmax(0, max-content);
+    }
 }
 
 .details small {
@@ -145,7 +170,7 @@ input {
 }
 
 #selected-note {
-    font-size: 1.45rem;
+    font-size: clamp(1.75rem, 3.5vw, 2.25rem);
     font-weight: 700;
     margin: 6px 0
 }

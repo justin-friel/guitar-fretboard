@@ -25,7 +25,7 @@ function getRelatedFrets(note) {
     const minorThirds = [];
     const perfectFifths = [];
     const frets = standardTuning.forEach(string => {
-        for (let fret = 0; fret < defaultFretCount; fret++) {
+        for (let fret = 0; fret <= this.fretCount; fret++) {
             const note = getNoteAt(string, fret);
             if (note.midiNoteNumber === relatedNotes.majorThird.midiNoteNumber) {
                 majorThirds.push({

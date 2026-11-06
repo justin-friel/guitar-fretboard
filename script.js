@@ -1,4 +1,5 @@
 import { createGuitar } from "./guitar.js";
+import { getRelatedNotes } from "./music.js";
 
 'use strict';
 
@@ -8,6 +9,9 @@ const board = document.getElementById('fretboard');
 const toggle = document.getElementById('use-sharps');
 const selectedNote = document.getElementById('selected-note');
 const selectedPosition = document.getElementById('selected-position');
+const minorThird = document.getElementById('minor-third');
+const majorThird = document.getElementById('major-third');
+const perfectFifth = document.getElementById('perfect-fifth');
 let selected = { stringIndex: 5, fret: 0 };
 
 function nameOfNote(note) { 
@@ -30,13 +34,21 @@ function addCell(text = '', classes = '') {
     return cell; 
 }
 
+function findButton(stringNumber, fretNumber) {
+    return board.querySelector(
+        `.note[data-string-number="${stringNumber}"]` +
+        `[data-fret-number="${fretNumber}"]`
+    );
+}
+
 function createButton(string, fret, stringIndex) {
     const button = document.createElement('button');
     const note = guitar.getNoteAt(string, fret);
     
     button.type = 'button';
     button.textContent = nameOfNote(note);
-
+    button.dataset.stringNumber = string.stringNumber;
+    button.dataset.fretNumber = fret;
     button.className = 'note';
     button.setAttribute(
         'aria-label', 
@@ -44,16 +56,44 @@ function createButton(string, fret, stringIndex) {
     );
     button.classList.toggle('highlight-primary',
         selected.stringIndex === stringIndex && selected.fret === fret);
-    
+
     button.addEventListener('click', () => {
-        const previousButton = board.querySelector('.note.highlight-primary');
-        previousButton?.classList.remove('highlight-primary');
+        const previousButtons = document.querySelectorAll(
+            '.note.highlight-primary, .note.highlight-secondary, .note.highlight-tertiary');
+
+        previousButtons.forEach((button) => {
+            button.classList.remove(
+                'highlight-primary',
+                'highlight-secondary',
+                'highlight-tertiary'
+            )
+        });
         button.classList.add('highlight-primary');
         selected = { stringIndex, fret };
 
+        highlightRelatedNotes(stringIndex, fret);
         renderInfo();
     });
     return button;
+}
+
+function highlightRelatedNotes(stringIndex, fret) {
+    const guitarString = guitar.strings[stringIndex];
+    const rootNote = guitar.getNoteAt(guitarString, fret);
+    const relatedNotes = guitar.getRelatedFrets(rootNote);
+
+    relatedNotes.majorThirds.forEach((note) => {
+        const button = findButton(note.string.stringNumber, note.fretNumber);
+        button?.classList.add('highlight-secondary');
+    });
+    relatedNotes.minorThirds.forEach((note) => {
+        const button = findButton(note.string.stringNumber, note.fretNumber);
+        button?.classList.add('highlight-secondary');
+    });
+    relatedNotes.perfectFifths.forEach((note) => {
+        const button = findButton(note.string.stringNumber, note.fretNumber);
+        button?.classList.add('highlight-tertiary');
+    });
 }
 
 function renderFretboard(){
@@ -74,13 +114,23 @@ function renderFretboard(){
             cell.appendChild(button);
         }
     });
+
+    highlightRelatedNotes(selected.stringIndex, selected.fret);
+}
+
+function describeNote(note) {
+    return `${nameOfNote(note)} · ${note.frequency.toFixed(2)} Hz`;
 }
 
 function renderInfo() {
     const string = guitar.strings[selected.stringIndex];
     const note = guitar.getNoteAt(string, selected.fret);
-    selectedNote.textContent = `${nameOfNote(note)} · ${note.frequency.toFixed(2)} Hz`;
+    const relatedNotes = getRelatedNotes(note);
+    selectedNote.textContent = describeNote(note);
     selectedPosition.textContent = `${string.label} string · ${selected.fret === 0 ? 'open' : `fret ${selected.fret}`}`;
+    minorThird.textContent = describeNote(relatedNotes.minorThird);
+    majorThird.textContent = describeNote(relatedNotes.majorThird);
+    perfectFifth.textContent = describeNote(relatedNotes.perfectFifth);
 }
 
 function render() {
@@ -90,4 +140,3 @@ function render() {
 
 toggle.addEventListener('change', render);
 render();
-

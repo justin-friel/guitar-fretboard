@@ -22,9 +22,23 @@
         <div class="scroller">
             <div id="fretboard" class="fretboard" aria-label="Guitar fretboard"></div>
         </div>
-        <section class="details" aria-live="polite"><small>Selected note</small>
-            <div id="selected-note"></div>
-            <div id="selected-position"></div>
+        <section class="details" aria-live="polite">
+            <div>
+                <small>Selected note</small>
+                <div id="selected-note"></div>
+                <div id="selected-position"></div>
+            </div>
+            <div>
+                <small>Related notes</small>
+                <dl class="related-details">
+                    <dt>Minor third</dt>
+                    <dd id="minor-third"></dd>
+                    <dt>Major third</dt>
+                    <dd id="major-third"></dd>
+                    <dt>Perfect fifth</dt>
+                    <dd id="perfect-fifth"></dd>
+                </dl>
+            </div>
         </section>
         <footer>Each fret raises the pitch by one semitone. Fret 12 is one octave above the open string (twice its
             frequency). Frequencies use A4 = 440 Hz.</footer>
