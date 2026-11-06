@@ -1,4 +1,4 @@
-import { getNote } from "./music.js";
+import { getNote, getRelatedNotes } from "./music.js";
 
 const defaultFretCount = 21;
 
@@ -18,6 +18,41 @@ function getNoteAt(guitarString, fret) {
     return getNote(midiNoteNumber);
 }
 
+function getRelatedFrets(note) {
+    const relatedNotes = getRelatedNotes(note);
+
+    const majorThirds = [];
+    const minorThirds = [];
+    const perfectFifths = [];
+    const frets = standardTuning.forEach(string => {
+        for (let fret = 0; fret < defaultFretCount; fret++) {
+            const note = getNoteAt(string, fret);
+            if (note.midiNoteNumber === relatedNotes.majorThird.midiNoteNumber) {
+                majorThirds.push({
+                    string: string, 
+                    fretNumber: fret
+                });
+            } else if (note.midiNoteNumber === relatedNotes.minorThird.midiNoteNumber) {
+                minorThirds.push({
+                    string: string, 
+                    fretNumber: fret
+                });
+            } else if (note.midiNoteNumber === relatedNotes.perfectFifth.midiNoteNumber) {
+                perfectFifths.push({
+                    string: string, 
+                    fretNumber: fret
+                });
+            }
+        }
+    });
+
+    return Object.freeze({
+        majorThirds: majorThirds,
+        minorThirds: minorThirds,
+        perfectFifths: perfectFifths
+    });
+}
+
 export function createGuitar(numberOfFrets) {
     let frets = defaultFretCount;
     if (Number.isInteger(numberOfFrets) && numberOfFrets > 0) {
@@ -27,6 +62,7 @@ export function createGuitar(numberOfFrets) {
     return Object.freeze({
         fretCount: frets,
         strings: standardTuning,
-        getNoteAt: getNoteAt
+        getNoteAt: getNoteAt,
+        getRelatedFrets: getRelatedFrets
     });
 }

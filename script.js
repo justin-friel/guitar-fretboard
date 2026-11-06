@@ -42,14 +42,15 @@ function createButton(string, fret, stringIndex) {
         'aria-label', 
         `${string.label} string, fret ${fret}, ${button.textContent}`
     );
-    button.setAttribute('aria-pressed', String(selected.stringIndex === stringIndex && selected.fret === fret));
+    button.classList.toggle('highlight-primary',
+        selected.stringIndex === stringIndex && selected.fret === fret);
     
     button.addEventListener('click', () => {
-        const previousButton = board.querySelector('.note[aria-pressed="true"]');
-
-        previousButton?.setAttribute('aria-pressed', 'false');
-        button.setAttribute('aria-pressed', 'true');
+        const previousButton = board.querySelector('.note.highlight-primary');
+        previousButton?.classList.remove('highlight-primary');
+        button.classList.add('highlight-primary');
         selected = { stringIndex, fret };
+
         renderInfo();
     });
     return button;

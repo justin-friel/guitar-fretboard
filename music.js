@@ -1,4 +1,7 @@
 const semitonesPerOctave = 12;
+const majorThirdSemitones = 4;
+const minorThirdSemitones = 3;
+const perfectFifthSemitones = 7;
 
 const noteNames = [
     { natural: 'C', sharp: null, flat: null },
@@ -32,7 +35,7 @@ function createNote(midiNoteNumber, frequency) {
 
 const referenceNote = createNote(69, 440);
 
-export function getNote(midiNoteNumber) {
+function getNote(midiNoteNumber) {
 
     const semitoneDistance =
         midiNoteNumber - referenceNote.midiNoteNumber;
@@ -45,3 +48,19 @@ export function getNote(midiNoteNumber) {
 
     return createNote(midiNoteNumber, frequency);
 }
+
+function getRelatedNote(note, semitoneCount) {
+    const relatedNoteNumber = note.midiNoteNumber + semitoneCount;
+    return getNote(relatedNoteNumber);
+}
+
+function getRelatedNotes(note) {
+    return Object.freeze({
+        majorThird: getRelatedNote(note, majorThirdSemitones),
+        minorThird: getRelatedNote(note, minorThirdSemitones),
+        perfectFifth: getRelatedNote(note, perfectFifthSemitones)
+    });
+}
+
+export { getNote, getRelatedNotes }
+
