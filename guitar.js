@@ -24,32 +24,32 @@ function getRelatedFrets(note) {
     const majorThirds = [];
     const minorThirds = [];
     const perfectFifths = [];
-    const frets = standardTuning.forEach(string => {
+    standardTuning.forEach(string => {
         for (let fret = 0; fret <= this.fretCount; fret++) {
             const note = getNoteAt(string, fret);
             if (note.midiNoteNumber === relatedNotes.majorThird.midiNoteNumber) {
-                majorThirds.push({
+                majorThirds.push(Object.freeze({
                     string: string, 
                     fretNumber: fret
-                });
+            }));
             } else if (note.midiNoteNumber === relatedNotes.minorThird.midiNoteNumber) {
-                minorThirds.push({
+                minorThirds.push(Object.freeze({
                     string: string, 
                     fretNumber: fret
-                });
+                }));
             } else if (note.midiNoteNumber === relatedNotes.perfectFifth.midiNoteNumber) {
-                perfectFifths.push({
+                perfectFifths.push(Object.freeze({
                     string: string, 
                     fretNumber: fret
-                });
+                }));
             }
         }
     });
 
     return Object.freeze({
-        majorThirds: majorThirds,
-        minorThirds: minorThirds,
-        perfectFifths: perfectFifths
+        majorThirds: Object.freeze(majorThirds),
+        minorThirds: Object.freeze(minorThirds),
+        perfectFifths: Object.freeze(perfectFifths)
     });
 }
 

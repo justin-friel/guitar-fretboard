@@ -6,7 +6,7 @@ import { getRelatedNotes } from "./music.js";
 const guitar = createGuitar(21);
 
 const board = document.getElementById('fretboard');
-const toggle = document.getElementById('use-sharps');
+const showNotesAs = document.querySelectorAll('input[name="sharpsOrFlats"]');
 const selectedNote = document.getElementById('selected-note');
 const selectedPosition = document.getElementById('selected-position');
 const minorThird = document.getElementById('minor-third');
@@ -14,13 +14,15 @@ const majorThird = document.getElementById('major-third');
 const perfectFifth = document.getElementById('perfect-fifth');
 let selected = { stringIndex: 5, fret: 0 };
 
-function nameOfNote(note) { 
+function nameOfNote(note) {
+    let sharpOrFlatName = 'sharp';
 
-    const sharpOrFlatName = toggle.checked
-        ? note.names.sharp
-        : note.names.flat;
-
-    const noteName = sharpOrFlatName ?? note.names.natural;
+    showNotesAs.forEach((radio) => {
+        if (radio.checked) {
+            sharpOrFlatName = radio.value;
+        }
+    });
+    const noteName = note.names[sharpOrFlatName] ?? note.names.natural;
 
     return noteName + note.octave;
 }
@@ -77,23 +79,20 @@ function createButton(string, fret, stringIndex) {
     return button;
 }
 
+function highlightFretPositions(positions, className) {
+    positions.forEach((position) => {
+        const button = findButton(position.string.stringNumber, position.fretNumber);
+        button?.classList.add(className);
+    });
+}
+
 function highlightRelatedNotes(stringIndex, fret) {
     const guitarString = guitar.strings[stringIndex];
     const rootNote = guitar.getNoteAt(guitarString, fret);
-    const relatedNotes = guitar.getRelatedFrets(rootNote);
+    const relatedFrets = guitar.getRelatedFrets(rootNote);
 
-    relatedNotes.majorThirds.forEach((note) => {
-        const button = findButton(note.string.stringNumber, note.fretNumber);
-        button?.classList.add('highlight-secondary');
-    });
-    relatedNotes.minorThirds.forEach((note) => {
-        const button = findButton(note.string.stringNumber, note.fretNumber);
-        button?.classList.add('highlight-secondary');
-    });
-    relatedNotes.perfectFifths.forEach((note) => {
-        const button = findButton(note.string.stringNumber, note.fretNumber);
-        button?.classList.add('highlight-tertiary');
-    });
+    highlightFretPositions([ ...relatedFrets.majorThirds, ...relatedFrets.minorThirds ], 'highlight-secondary');
+    highlightFretPositions(relatedFrets.perfectFifths, 'highlight-tertiary');
 }
 
 function renderFretboard(){
@@ -138,5 +137,10 @@ function render() {
     renderInfo();
 }
 
-toggle.addEventListener('change', render);
+showNotesAs.forEach((radioButton) => {
+    radioButton.addEventListener('change', function() {
+        render();
+    });
+});
+
 render();

@@ -45,6 +45,13 @@ p {
     cursor: pointer
 }
 
+.note-name-options {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px
+}
+
 input {
     width: 20px;
     height: 20px;

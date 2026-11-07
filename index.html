@@ -12,12 +12,15 @@
 <body>
     <main>
         <h1>Interactive Guitar Fretboard</h1>
-        <p>Standard tuning · E A D G B E</p>
-        <div class="toolbar"><span>Tap a note to see its frequency and position.</span>
-            <label>
-                <input id="use-sharps" type="checkbox" checked>
-                Show sharps instead of flats
-            </label>
+        <div class="toolbar">
+            <span>Tap a note to see its frequency and position.</span>
+            <div class="note-name-options" role="radiogroup" aria-labelledby="note-name-options-label">
+                <span id="note-name-options-label">Show notes as:</span>
+                <input type="radio" id="sharps" name="sharpsOrFlats" value="sharp" checked>
+                <label for="sharps">Sharps</label>
+                <input type="radio" id="flats" name="sharpsOrFlats" value="flat">
+                <label for="flats">Flats</label>
+            </div>
         </div>
         <div class="scroller">
             <div id="fretboard" class="fretboard" aria-label="Guitar fretboard"></div>
@@ -40,8 +43,11 @@
                 </dl>
             </div>
         </section>
-        <footer>Each fret raises the pitch by one semitone. Fret 12 is one octave above the open string (twice its
-            frequency). Frequencies use A4 = 440 Hz.</footer>
+        <footer>
+            <p>Each fret raises the pitch by one semitone. Fret 12 is one octave above the open string (twice its
+            frequency). Frequencies use A4 = 440 Hz.</p>
+            <p>Standard tuning · E A D G B E</p>
+        </footer>
     </main>
 </body>
 
