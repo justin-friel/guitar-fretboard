@@ -12,37 +12,56 @@
 <body>
     <main>
         <h1>Interactive Guitar Fretboard</h1>
-        <div class="toolbar">
-            <span>Tap a note to see its frequency and position.</span>
-            <div class="note-name-options" role="radiogroup" aria-labelledby="note-name-options-label">
-                <span id="note-name-options-label">Show notes as:</span>
-                <input type="radio" id="sharps" name="sharpsOrFlats" value="sharp" checked>
-                <label for="sharps">Sharps</label>
-                <input type="radio" id="flats" name="sharpsOrFlats" value="flat">
-                <label for="flats">Flats</label>
+        <nav class="tabs" aria-label="Fretboard mode">
+            <button type="button" class="tab active" data-tab="notes">Notes</button>
+            <button type="button" class="tab" data-tab="chords">Chords</button>
+        </nav>
+
+        <div id="notes-panel">
+            <div class="toolbar">
+                <span>Tap a note to see its frequency and position.</span>
+                <div class="note-name-options" role="radiogroup" aria-labelledby="note-name-options-label">
+                    <span id="note-name-options-label">Show notes as:</span>
+                    <input type="radio" id="sharps" name="sharpsOrFlats" value="sharp" checked>
+                    <label for="sharps">Sharps</label>
+                    <input type="radio" id="flats" name="sharpsOrFlats" value="flat">
+                    <label for="flats">Flats</label>
+                </div>
             </div>
         </div>
+        <div id="chords-panel" hidden>
+            <div class="toolbar">
+                <label for="chord-select">Chord:</label>
+                <select id="chord-select">
+                    <option value="">Select</option>
+                </select>
+            </div>
+        </div>
+
         <div class="scroller">
             <div id="fretboard" class="fretboard" aria-label="Guitar fretboard"></div>
         </div>
-        <section class="details" aria-live="polite">
-            <div>
-                <small>Selected note</small>
-                <div id="selected-note"></div>
-                <div id="selected-position"></div>
-            </div>
-            <div>
-                <small>Related notes</small>
-                <dl class="related-details">
-                    <dt>Minor third</dt>
-                    <dd id="minor-third"></dd>
-                    <dt>Major third</dt>
-                    <dd id="major-third"></dd>
-                    <dt>Perfect fifth</dt>
-                    <dd id="perfect-fifth"></dd>
-                </dl>
-            </div>
-        </section>
+        <div id="notes-details">
+            <section class="details" aria-live="polite">
+                <div>
+                    <small>Selected note</small>
+                    <div id="selected-note"></div>
+                    <div id="selected-position"></div>
+                </div>
+                <div>
+                    <small>Related notes</small>
+                    <dl class="related-details">
+                        <dt>Minor third</dt>
+                        <dd id="minor-third"></dd>
+                        <dt>Major third</dt>
+                        <dd id="major-third"></dd>
+                        <dt>Perfect fifth</dt>
+                        <dd id="perfect-fifth"></dd>
+                    </dl>
+                </div>
+            </section>
+        </div>
+
         <footer>
             <p>Each fret raises the pitch by one semitone. Fret 12 is one octave above the open string (twice its
             frequency). Frequencies use A4 = 440 Hz.</p>

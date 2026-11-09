@@ -5,6 +5,10 @@
     color: #202124
 }
 
+[hidden] {
+	display: none !important;
+}
+
 * {
     box-sizing: border-box
 }
@@ -27,6 +31,32 @@ h1 {
 p {
     line-height: 1.5;
     color: #555
+}
+
+.tabs {
+	display: flex;
+	gap: 4px;
+	border-bottom: 1px solid #c8cbd0;
+	margin-top: 20px;
+}
+
+.tab {
+	padding: 10px 20px;
+	border: 0;
+	border-bottom: 3px solid transparent;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+
+.tab:hover {
+	background: #e8effb;
+}
+
+.tab.active {
+	border-bottom-color: #285db3;
+	font-weight: 700;
 }
 
 .toolbar {
@@ -131,6 +161,16 @@ input {
 	outline-offset: -2px;
 }
 
+.note.highlight-additional {
+	background: #f3e8ff;
+	outline: 2px solid #9333ea;
+	outline-offset: -2px;
+}
+
+.note.note-unplayed {
+	opacity: 0.3;
+}
+
 .note:focus-visible {
     outline: 3px solid #285db3;
     outline-offset: -3px
@@ -197,6 +237,17 @@ footer {
         color: #e8eaed
     }
 
+    .tabs {
+        border-bottom-color: #4b5058;
+    }
+
+    .tab:hover {
+        background: #303f57;
+    }
+
+    .tab.active {
+        border-bottom-color: #87b5ff;
+    }
     .scroller,
     .details {
         background: #202328;
@@ -236,6 +287,15 @@ footer {
         outline-color: #4ade80;
     }
 
+    .note.highlight-additional {
+        background: #581c87;
+        outline: 2px solid #c084fc;
+    }
+
+    .note.note-unplayed {
+        opacity: 0.3;
+    }
+    
     p,
     #selected-position,
     footer {
