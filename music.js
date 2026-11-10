@@ -62,5 +62,25 @@ function getRelatedNotes(note) {
     });
 }
 
-export { getNote, getRelatedNotes }
+const isSameNoteAnyOctave = (rootNote, note) =>
+    (note.midiNoteNumber - rootNote.midiNoteNumber) % semitonesPerOctave === 0;
+
+const isMajorThirdAnyOctave = (rootNote, note) => 
+    (note.midiNoteNumber - rootNote.midiNoteNumber) %12 === majorThirdSemitones;
+
+const isMinorThirdAnyOctave = (rootNote, note) => 
+    (note.midiNoteNumber - rootNote.midiNoteNumber) %12 === minorThirdSemitones;
+
+const isPerfectFifthAnyOctave = (rootNote, note) => 
+    (note.midiNoteNumber - rootNote.midiNoteNumber) %12 === perfectFifthSemitones
+
+
+export { 
+    getNote,
+    getRelatedNotes,
+    isSameNoteAnyOctave,
+    isMajorThirdAnyOctave, 
+    isMinorThirdAnyOctave, 
+    isPerfectFifthAnyOctave 
+}
 

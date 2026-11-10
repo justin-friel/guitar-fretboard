@@ -1,4 +1,4 @@
-import { getNote, getRelatedNotes } from "./music.js";
+import { getNote, getRelatedNotes, isSameNoteAnyOctave, isMajorThirdAnyOctave , isMinorThirdAnyOctave, isPerfectFifthAnyOctave} from "./music.js";
 import { getChordPosition } from "./guitarChord.js";
 
 const defaultFretCount = 21;
@@ -71,41 +71,25 @@ export function createGuitar(numberOfFrets) {
             );
 
             const currentNote = getNoteAt(string, position.fretNumber);
-            if (currentNote.midiNoteNumber == rootNote.midiNoteNumber) {
-                position.note = currentNote;
-            }
-            //TODO: find the root note position.
+            position.string = string;
+            position.note = currentNote;
 
-
-            // Data structure of getRelatedFrets
-            // {
-            //     majorThirds: Object.freeze(majorThirds),
-            //     minorThirds: Object.freeze(minorThirds),
-            //     perfectFifths: Object.freeze(perfectFifths)
-            // }
-            // {
-            //     string: string, 
-            //     fretNumber: fret
-            // }
-            const majorThird = relatedFrets.majorThirds.find(
-                (majorThird) => majorThird.string.stringNumber === position.stringNumber
-                     && majorThird.fret === position.fretNumber
-            );
+            if (isSameNoteAnyOctave(rootNote, currentNote)) {
+                position.role = 'Root'
+            } else if (isMajorThirdAnyOctave(rootNote, currentNote)) {
+                position.role = 'Major Third'
+            } else if (isMinorThirdAnyOctave(rootNote, currentNote)) {
+                position.role = 'Minor Third'
+            } else if (isPerfectFifthAnyOctave(rootNote, currentNote)) {
+                position.role = 'Perfect fifth'
+            } 
             
-            if (majorThird) { //TODO: if the position isn't in related frets, get the note.
-                position = majorThird;
-            } else {
-                const note = getNoteAt(
-                    string,
-                    position.fretNumber
-                );
-                position = note;
-            }
+            return position;
         });
 
         return Object.freeze({
             rootNote,
-            ...positions,
+            positions,
         });
     }
 

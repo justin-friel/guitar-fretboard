@@ -99,6 +99,12 @@ function highlightFretPositions(positions, className) {
     });
 }
 
+function markUnplayed(positions) {
+    positions.forEach((position) => {
+        position?.classList.add('note-unplayed');
+    });
+}
+
 function highlightRelatedNotes(stringIndex, fret) {
     const guitarString = guitar.strings[stringIndex];
     const rootNote = guitar.getNoteAt(guitarString, fret);
@@ -108,33 +114,39 @@ function highlightRelatedNotes(stringIndex, fret) {
     highlightFretPositions(relatedFrets.perfectFifths, 'highlight-tertiary');
 }
 
-function highlightChord(chordName) {
-	const buttons = board.querySelectorAll('.note');
-
+function highlightChord(chordId) {
 	clearFretHighlights();
-/*
-	const testPositions = [
-		{ stringNumber: 6, fretNumber: 0, className: 'highlight-primary' },
-		{ stringNumber: 3, fretNumber: 1, className: 'highlight-secondary' },
-		{ stringNumber: 5, fretNumber: 2, className: 'highlight-tertiary' },
-		{ stringNumber: 4, fretNumber: 2, className: 'highlight-additional' }
-	];
+	
+    const buttons = board.querySelectorAll('.note');
+    markUnplayed(buttons);
 
-	testPositions.forEach(({ stringNumber, fretNumber, className }) => {
-		const button = findButton(stringNumber, fretNumber);
-		if (!button)  {
-            return;
+    const chord = guitar.getChord(chordId);
+    chord.positions.forEach((position) => {
+        const button = findButton(position.string.stringNumber, position.fretNumber);
+        switch (position.role) {
+            case 'Root':
+                button.classList.remove('note-unplayed');
+                button?.classList.add('highlight-primary');
+                break
+            case 'Major Third':
+            case 'Minor Third':
+                button.classList.remove('note-unplayed');
+                button?.classList.add('highlight-secondary');
+                break;
+            case 'Perfect fifth':
+                button.classList.remove('note-unplayed');
+                button?.classList.add('highlight-tertiary');
+                break;
+            default:
+                button.classList.remove('note-unplayed');
+                button?.classList.add('highlight-additional');
+                break;
         }
-
-		button.classList.remove('note-unplayed');
-		button.classList.add(className);
-	});
-*/
+    });
 }
 
 function isNotesMode() {
     const activeTabName = document.querySelector('.tab.active')?.dataset.tab;
-
     return (activeTabName === 'notes');
 }
 
@@ -210,15 +222,7 @@ tabs.forEach((tab) => {
 });
 
 chordSelect.addEventListener('change', () => {
-    const chordName = getChordNames().find(
-        (chordName) => chordName.key === chordSelect.value 
-    );
-    if (chordName) {
-	    const chord = guitar.getChord(chordSelect.value);
-	// highlightChord(chordName);
-
-    }
-    
+    highlightChord(chordSelect.value);
 });
 
 getChordNames().forEach((chordName) => {
@@ -229,3 +233,7 @@ getChordNames().forEach((chordName) => {
 });
 
 render();
+
+if (new URLSearchParams(window.location.search).get('tab') === 'chords') {
+    document.querySelector('.tab[data-tab="chords"]').click();
+}
