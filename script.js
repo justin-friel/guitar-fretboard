@@ -205,11 +205,14 @@ tabs.forEach((tab) => {
             tabs.forEach((button) => {
                 button.classList.toggle('active', button === tab);
             });
+            chordsPanel.hidden = activeTabName() !== 'chords'
+            if (activeTabName !== 'chords') {
+                chordSelect.value = '';
+            }
+            
             notesPanel.hidden = activeTabName() !== 'notes'
             notesDetails.hidden = activeTabName() !== 'notes'
-            chordsPanel.hidden = activeTabName() !== 'chords'
             if (activeTabName() === 'notes') {
-                chordSelect.value = '';
                 render();
             } else {
                 clearFretHighlights();
