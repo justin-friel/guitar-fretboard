@@ -115,7 +115,6 @@ function highlightRelatedNotes(stringIndex, fret) {
 }
 
 function highlightChord(chordId) {
-	clearFretHighlights();
 	
     const buttons = board.querySelectorAll('.note');
     markUnplayed(buttons);
@@ -145,10 +144,7 @@ function highlightChord(chordId) {
     });
 }
 
-function isNotesMode() {
-    const activeTabName = document.querySelector('.tab.active')?.dataset.tab;
-    return (activeTabName === 'notes');
-}
+const activeTabName = () => document.querySelector('.tab.active')?.dataset.tab;
 
 function renderFretboard(){
     board.style.setProperty('--fret-column-count', guitar.fretCount + 1); 
@@ -169,7 +165,7 @@ function renderFretboard(){
         }
     });
 
-    if (isNotesMode()) {       
+    if (activeTabName() === 'notes') {
         highlightRelatedNotes(selected.stringIndex, selected.fret);
     }
 }
@@ -202,27 +198,35 @@ showNotesAs.forEach((radioButton) => {
 
 
 tabs.forEach((tab) => {
-	tab.addEventListener('click', () => {
-		const isNotesMode = tab.dataset.tab === 'notes';
+    tab.addEventListener('click', () => {
 
-		tabs.forEach((button) => {
-			button.classList.toggle('active', button === tab);
-		});
+        if (activeTabName() !== tab.dataset.tab) {
 
-
-		notesPanel.hidden = !isNotesMode;
-		notesDetails.hidden = !isNotesMode;
-		chordsPanel.hidden = isNotesMode;
-        if (isNotesMode) {
-            render();
-        } else {
-            clearFretHighlights();
+            tabs.forEach((button) => {
+                button.classList.toggle('active', button === tab);
+            });
+            notesPanel.hidden = activeTabName() !== 'notes'
+            notesDetails.hidden = activeTabName() !== 'notes'
+            chordsPanel.hidden = activeTabName() !== 'chords'
+            if (activeTabName() === 'notes') {
+                chordSelect.value = '';
+                render();
+            } else {
+                clearFretHighlights();
+                
+            }
         }
 	});
 });
 
 chordSelect.addEventListener('change', () => {
-    highlightChord(chordSelect.value);
+    clearFretHighlights();
+    const chordName = getChordNames().find(
+        (chord) => chord.key === chordSelect.value
+    );
+    if (chordName) {
+        highlightChord(chordSelect.value);
+    }
 });
 
 getChordNames().forEach((chordName) => {
