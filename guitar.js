@@ -62,30 +62,22 @@ export function createGuitar(numberOfFrets) {
 
     function getChord(chordId) {
         const rawPositions = getChordPosition(chordId);
+        if (!rawPositions) {
+            return null;
+        }
+
         const rootNote = getNote(rawPositions.rootMidiNoteNumber);
-        const relatedFrets = getRelatedFrets(rootNote);
 
-        const positions = rawPositions.positions.map((position) => {
-            const string = standardTuning.find(
-                (string) => string.stringNumber === position.stringNumber
-            );
+        const positions = Object.freeze(
+            rawPositions.positions.map((position) => {
+                const string = standardTuning.find(
+                    (string) => string.stringNumber === position.stringNumber
+                );
 
-            const currentNote = getNoteAt(string, position.fretNumber);
-            position.string = string;
-            position.note = currentNote;
-
-            if (isSameNoteAnyOctave(rootNote, currentNote)) {
-                position.role = 'Root'
-            } else if (isMajorThirdAnyOctave(rootNote, currentNote)) {
-                position.role = 'Major Third'
-            } else if (isMinorThirdAnyOctave(rootNote, currentNote)) {
-                position.role = 'Minor Third'
-            } else if (isPerfectFifthAnyOctave(rootNote, currentNote)) {
-                position.role = 'Perfect fifth'
-            } 
-            
-            return position;
-        });
+                const currentNote = getNoteAt(string, position.fretNumber);
+                return mapPosition(position, string, currentNote, rootNote);
+            })
+        );
 
         return Object.freeze({
             rootNote,
@@ -99,5 +91,25 @@ export function createGuitar(numberOfFrets) {
         getNoteAt,
         getRelatedFrets,
         getChord
+    });
+}
+function mapPosition(position, string, currentNote, rootNote) {
+
+    let role = 'Other';
+    if (isSameNoteAnyOctave(rootNote, currentNote)) {
+        role = 'Root';
+    } else if (isMajorThirdAnyOctave(rootNote, currentNote)) {
+        role = 'Major Third';
+    } else if (isMinorThirdAnyOctave(rootNote, currentNote)) {
+        role = 'Minor Third';
+    } else if (isPerfectFifthAnyOctave(rootNote, currentNote)) {
+        role = 'Perfect fifth';
+    }
+
+    return Object.freeze({
+        ...position,
+        string,
+        note: currentNote,
+        role
     });
 }

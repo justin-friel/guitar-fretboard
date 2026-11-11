@@ -6,7 +6,10 @@ import { getChordNames } from './guitarChord.js';
 
 const guitar = createGuitar(21);
 
+const tabNameNotes = 'notes';
+const tabNameChords = 'chords'
 const tabs = document.querySelectorAll('.tab');
+const activeTabName = () => document.querySelector('.tab.active')?.dataset.tab;
 const notesPanel = document.getElementById('notes-panel');
 const chordsPanel = document.getElementById('chords-panel');
 const notesDetails = document.getElementById('notes-details');
@@ -18,7 +21,8 @@ const selectedPosition = document.getElementById('selected-position');
 const minorThird = document.getElementById('minor-third');
 const majorThird = document.getElementById('major-third');
 const perfectFifth = document.getElementById('perfect-fifth');
-let selected = { stringIndex: 5, fret: 0 };
+const defaultSelected = { stringIndex: 5, fret: 0 };
+let selected = defaultSelected;
 
 function nameOfNote(note) {
     let sharpOrFlatName = 'sharp';
@@ -66,12 +70,14 @@ function createButton(string, fret, stringIndex) {
         selected.stringIndex === stringIndex && selected.fret === fret);
 
     button.addEventListener('click', () => {
-        clearFretHighlights();
-        button.classList.add('highlight-primary');
-        selected = { stringIndex, fret };
+        if (activeTabName() == tabNameNotes) {
+            clearFretHighlights();
+            button.classList.add('highlight-primary');
+            selected = { stringIndex, fret };
 
-        highlightRelatedNotes(stringIndex, fret);
-        renderInfo();
+            highlightRelatedNotes(stringIndex, fret);
+            renderInfo();
+        }
     });
     return button;
 }
@@ -120,6 +126,10 @@ function highlightChord(chordId) {
     markUnplayed(buttons);
 
     const chord = guitar.getChord(chordId);
+    if (!chord) {
+        return;
+    }
+    
     chord.positions.forEach((position) => {
         const button = findButton(position.string.stringNumber, position.fretNumber);
         switch (position.role) {
@@ -144,8 +154,6 @@ function highlightChord(chordId) {
     });
 }
 
-const activeTabName = () => document.querySelector('.tab.active')?.dataset.tab;
-
 function renderFretboard(){
     board.style.setProperty('--fret-column-count', guitar.fretCount + 1); 
     board.replaceChildren();
@@ -165,7 +173,7 @@ function renderFretboard(){
         }
     });
 
-    if (activeTabName() === 'notes') {
+    if (activeTabName() === tabNameNotes) {
         highlightRelatedNotes(selected.stringIndex, selected.fret);
     }
 }
@@ -205,18 +213,19 @@ tabs.forEach((tab) => {
             tabs.forEach((button) => {
                 button.classList.toggle('active', button === tab);
             });
-            chordsPanel.hidden = activeTabName() !== 'chords'
-            if (activeTabName !== 'chords') {
+
+            chordsPanel.hidden = activeTabName() !== tabNameChords
+            if (activeTabName() !== tabNameChords) {
                 chordSelect.value = '';
             }
             
-            notesPanel.hidden = activeTabName() !== 'notes'
-            notesDetails.hidden = activeTabName() !== 'notes'
-            if (activeTabName() === 'notes') {
+            notesPanel.hidden = activeTabName() !== tabNameNotes
+            notesDetails.hidden = activeTabName() !== tabNameNotes
+            if (activeTabName() === tabNameNotes) {
                 render();
             } else {
                 clearFretHighlights();
-                
+                selected = defaultSelected;
             }
         }
 	});
@@ -224,12 +233,7 @@ tabs.forEach((tab) => {
 
 chordSelect.addEventListener('change', () => {
     clearFretHighlights();
-    const chordName = getChordNames().find(
-        (chord) => chord.key === chordSelect.value
-    );
-    if (chordName) {
-        highlightChord(chordSelect.value);
-    }
+    highlightChord(chordSelect.value);
 });
 
 getChordNames().forEach((chordName) => {
@@ -241,6 +245,6 @@ getChordNames().forEach((chordName) => {
 
 render();
 
-if (new URLSearchParams(window.location.search).get('tab') === 'chords') {
+if (new URLSearchParams(window.location.search).get('tab') === tabNameChords) {
     document.querySelector('.tab[data-tab="chords"]').click();
 }
