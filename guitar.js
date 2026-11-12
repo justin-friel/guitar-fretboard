@@ -14,9 +14,9 @@ const standardTuning = Object.freeze([
 
 export function createGuitar(numberOfFrets) {
     const fretCount =
-    Number.isInteger(numberOfFrets) && numberOfFrets > 0
-        ? numberOfFrets
-        : defaultFretCount;
+        Number.isInteger(numberOfFrets) && numberOfFrets > 0
+            ? numberOfFrets
+            : defaultFretCount;
 
     function getNoteAt(guitarString, fret) {
         const midiNoteNumber =
@@ -35,17 +35,17 @@ export function createGuitar(numberOfFrets) {
                 const note = getNoteAt(string, fret);
                 if (note.midiNoteNumber === relatedNotes.majorThird.midiNoteNumber) {
                     majorThirds.push(Object.freeze({
-                        string: string, 
+                        string,
                         fretNumber: fret
-                }));
+                    }));
                 } else if (note.midiNoteNumber === relatedNotes.minorThird.midiNoteNumber) {
                     minorThirds.push(Object.freeze({
-                        string: string, 
+                        string,
                         fretNumber: fret
                     }));
                 } else if (note.midiNoteNumber === relatedNotes.perfectFifth.midiNoteNumber) {
                     perfectFifths.push(Object.freeze({
-                        string: string, 
+                        string,
                         fretNumber: fret
                     }));
                 }

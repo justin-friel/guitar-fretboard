@@ -1,13 +1,11 @@
 import { createGuitar } from "./guitar.js";
 import { intervals, getRelatedNotes } from "./music.js";
-import { getChordNames } from './guitarChord.js';
-
-'use strict';
+import { getChordNames } from "./guitarChord.js";
 
 const guitar = createGuitar(21);
 
 const tabNameNotes = 'notes';
-const tabNameChords = 'chords'
+const tabNameChords = 'chords';
 const tabs = document.querySelectorAll('.tab');
 const activeTabName = () => document.querySelector('.tab.active')?.dataset.tab;
 const notesPanel = document.getElementById('notes-panel');
@@ -23,19 +21,13 @@ const minorThird = document.getElementById('minor-third');
 const majorThird = document.getElementById('major-third');
 const perfectFifth = document.getElementById('perfect-fifth');
 const chordRelatedDetails = document.getElementById('chord-related-details');
-const defaultSelected = { stringIndex: 5, fret: 0 };
-let selected = defaultSelected;
+const defaultSelected = Object.freeze({ stringIndex: 5, fret: 0 });
+let selected = { ...defaultSelected };
 const intervalClassMap = Object.freeze({
     [intervals.unison]: 'highlight-primary',
     [intervals.majorThird]: 'highlight-secondary',
     [intervals.minorThird]: 'highlight-secondary',
     [intervals.perfectFifth]: 'highlight-tertiary'
-});
-const intervalDisplayNames = Object.freeze({
-    [intervals.unison]: 'Root',
-    [intervals.majorThird]: 'Major Third',
-    [intervals.minorThird]: 'Minor Third',
-    [intervals.perfectFifth]: 'Perfect Fifth'
 });
 
 function nameOfNote(note) {
@@ -51,13 +43,12 @@ function nameOfNote(note) {
     return noteName + note.octave;
 }
 
-
-function addCell(text = '', classes = '') { 
-    const cell = document.createElement('div'); 
+function addCell(text = '', classes = '') {
+    const cell = document.createElement('div');
     cell.className = classes ? `cell ${classes}` : 'cell';
-    cell.textContent = text; 
-    board.appendChild(cell); 
-    return cell; 
+    cell.textContent = text;
+    board.appendChild(cell);
+    return cell;
 }
 
 function findButton(stringNumber, fretNumber) {
@@ -70,19 +61,19 @@ function findButton(stringNumber, fretNumber) {
 function createButton(string, fret, stringIndex) {
     const button = document.createElement('button');
     const note = guitar.getNoteAt(string, fret);
-    
+
     button.type = 'button';
     button.textContent = nameOfNote(note);
     button.dataset.stringNumber = string.stringNumber;
     button.dataset.fretNumber = fret;
     button.className = 'note';
     button.setAttribute(
-        'aria-label', 
+        'aria-label',
         `${string.label} string, fret ${fret}, ${button.textContent}`
     );
 
     button.addEventListener('click', () => {
-        if (activeTabName() == tabNameNotes) {
+        if (activeTabName() === tabNameNotes) {
             selected = { stringIndex, fret };
 
             const noteInfo = getSelectedNoteInfo();
@@ -100,9 +91,9 @@ function clearFretHighlights() {
         'highlight-tertiary',
         'highlight-additional',
         'note-unplayed'
-    ]
-    const classString =  `.${classNames.join(', .')}`;
-    const previousButtons = document.querySelectorAll(classString);
+    ];
+    const classString = `.${classNames.join(', .')}`;
+    const previousButtons = board.querySelectorAll(classString);
 
     previousButtons.forEach((button) => {
         button.classList.remove(...classNames);
@@ -128,9 +119,9 @@ function highlightFretPositions(positions, className) {
     });
 }
 
-function markUnplayed(positions) {
-    positions.forEach((position) => {
-        position?.classList.add('note-unplayed');
+function markUnplayed(buttons) {
+    buttons.forEach((button) => {
+        button?.classList.add('note-unplayed');
     });
 }
 
@@ -149,16 +140,16 @@ function highlightSelectedNote({ string, fret }) {
 function renderFretboardHighlights(noteInfo) {
     clearFretHighlights();
 
-    if (activeTabName() === tabNameNotes) {
+    const tabName = activeTabName();
+    if (tabName === tabNameNotes) {
         highlightSelectedNote(noteInfo);
         highlightRelatedNotes(noteInfo);
-    } else if (activeTabName() === tabNameChords) {
+    } else if (tabName === tabNameChords) {
         highlightChord(chordSelect.value);
     }
 }
 
 function highlightChord(chordId) {
-	
     const buttons = board.querySelectorAll('.note');
     markUnplayed(buttons);
 
@@ -166,7 +157,7 @@ function highlightChord(chordId) {
     if (!chord) {
         return;
     }
-    
+
     chord.positions.forEach((position) => {
         const button = findButton(position.string.stringNumber, position.fretNumber);
         button?.classList.remove('note-unplayed');
@@ -177,7 +168,7 @@ function highlightChord(chordId) {
 }
 
 function renderFretboard() {
-    board.style.setProperty('--fret-column-count', guitar.fretCount + 1); 
+    board.style.setProperty('--fret-column-count', guitar.fretCount + 1);
     board.replaceChildren();
     addCell('String', 'label heading');
 
@@ -208,9 +199,6 @@ function renderNoteInfo({ string, fret, note, relatedNotes }) {
     perfectFifth.textContent = describeNote(relatedNotes.perfectFifth);
 }
 
-function renderChordInfo() {
-}
-
 function render() {
     const noteInfo = getSelectedNoteInfo();
     renderFretboard();
@@ -219,41 +207,38 @@ function render() {
 }
 
 showNotesAs.forEach((radioButton) => {
-    radioButton.addEventListener('change', function() {
+    radioButton.addEventListener('change', () => {
         render();
     });
 });
 
-
 tabs.forEach((tab) => {
     tab.addEventListener('click', () => {
-
-        if (activeTabName() !== tab.dataset.tab) {
-
+        const nextTabName = tab.dataset.tab;
+        if (activeTabName() !== nextTabName) {
             tabs.forEach((button) => {
                 button.classList.toggle('active', button === tab);
             });
 
-            chordsPanel.hidden = activeTabName() !== tabNameChords
-            //chordsDetails.hidden = activeTabName() !== tabNameChords
-            if (activeTabName() !== tabNameChords) {
+            chordsPanel.hidden = nextTabName !== tabNameChords;
+            if (nextTabName !== tabNameChords) {
                 chordSelect.value = '';
             }
-            
-            notesPanel.hidden = activeTabName() !== tabNameNotes
-            notesDetails.hidden = activeTabName() !== tabNameNotes
-            if (activeTabName() === tabNameNotes) {
+
+            notesPanel.hidden = nextTabName !== tabNameNotes;
+            notesDetails.hidden = nextTabName !== tabNameNotes;
+            if (nextTabName === tabNameNotes) {
                 render();
-            } else if (activeTabName() === tabNameChords) {
+            } else if (nextTabName === tabNameChords) {
                 const noteInfo = getSelectedNoteInfo();
                 renderNoteInfo(noteInfo);
                 renderFretboardHighlights(noteInfo);
             } else {
                 clearFretHighlights();
-                selected = defaultSelected;
+                selected = { ...defaultSelected };
             }
         }
-	});
+    });
 });
 
 chordSelect.addEventListener('change', () => {
@@ -261,14 +246,14 @@ chordSelect.addEventListener('change', () => {
 });
 
 getChordNames().forEach((chordName) => {
-	const option = document.createElement('option');
-	option.value = chordName.key;
-	option.textContent = chordName.name;
-	chordSelect.appendChild(option);
+    const option = document.createElement('option');
+    option.value = chordName.key;
+    option.textContent = chordName.name;
+    chordSelect.appendChild(option);
 });
 
 render();
 
 if (new URLSearchParams(window.location.search).get('tab') === tabNameChords) {
-    document.querySelector('.tab[data-tab="chords"]').click();
+    document.querySelector(`.tab[data-tab="${tabNameChords}"]`).click();
 }
