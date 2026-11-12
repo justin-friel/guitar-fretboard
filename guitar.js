@@ -1,4 +1,4 @@
-import { getNote, getRelatedNotes, isSameNoteAnyOctave, isMajorThirdAnyOctave , isMinorThirdAnyOctave, isPerfectFifthAnyOctave} from "./music.js";
+import { getInterval, getNote, getRelatedNotes } from "./music.js";
 import { getChordPosition } from "./guitarChord.js";
 
 const defaultFretCount = 21;
@@ -25,9 +25,8 @@ export function createGuitar(numberOfFrets) {
         return getNote(midiNoteNumber);
     }
 
-    function getRelatedFrets(note) {
-        const relatedNotes = getRelatedNotes(note);
-
+    function getRelatedFrets(note, relatedNotes) {
+        relatedNotes ??= getRelatedNotes(note);
         const majorThirds = [];
         const minorThirds = [];
         const perfectFifths = [];
@@ -94,22 +93,10 @@ export function createGuitar(numberOfFrets) {
     });
 }
 function mapPosition(position, string, currentNote, rootNote) {
-
-    let role = 'Other';
-    if (isSameNoteAnyOctave(rootNote, currentNote)) {
-        role = 'Root';
-    } else if (isMajorThirdAnyOctave(rootNote, currentNote)) {
-        role = 'Major Third';
-    } else if (isMinorThirdAnyOctave(rootNote, currentNote)) {
-        role = 'Minor Third';
-    } else if (isPerfectFifthAnyOctave(rootNote, currentNote)) {
-        role = 'Perfect fifth';
-    }
-
     return Object.freeze({
         ...position,
         string,
         note: currentNote,
-        role
+        interval: getInterval(rootNote, currentNote)
     });
 }

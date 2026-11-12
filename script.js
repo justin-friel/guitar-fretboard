@@ -1,5 +1,5 @@
 import { createGuitar } from "./guitar.js";
-import { getRelatedNotes } from "./music.js";
+import { intervals, getRelatedNotes } from "./music.js";
 import { getChordNames } from './guitarChord.js';
 
 'use strict';
@@ -13,6 +13,7 @@ const activeTabName = () => document.querySelector('.tab.active')?.dataset.tab;
 const notesPanel = document.getElementById('notes-panel');
 const chordsPanel = document.getElementById('chords-panel');
 const notesDetails = document.getElementById('notes-details');
+const chordsDetails = document.getElementById('chords-details');
 const chordSelect = document.getElementById('chord-select');
 const board = document.getElementById('fretboard');
 const showNotesAs = document.querySelectorAll('input[name="sharpsOrFlats"]');
@@ -21,8 +22,21 @@ const selectedPosition = document.getElementById('selected-position');
 const minorThird = document.getElementById('minor-third');
 const majorThird = document.getElementById('major-third');
 const perfectFifth = document.getElementById('perfect-fifth');
+const chordRelatedDetails = document.getElementById('chord-related-details');
 const defaultSelected = { stringIndex: 5, fret: 0 };
 let selected = defaultSelected;
+const intervalClassMap = Object.freeze({
+    [intervals.unison]: 'highlight-primary',
+    [intervals.majorThird]: 'highlight-secondary',
+    [intervals.minorThird]: 'highlight-secondary',
+    [intervals.perfectFifth]: 'highlight-tertiary'
+});
+const intervalDisplayNames = Object.freeze({
+    [intervals.unison]: 'Root',
+    [intervals.majorThird]: 'Major Third',
+    [intervals.minorThird]: 'Minor Third',
+    [intervals.perfectFifth]: 'Perfect Fifth'
+});
 
 function nameOfNote(note) {
     let sharpOrFlatName = 'sharp';
@@ -66,17 +80,14 @@ function createButton(string, fret, stringIndex) {
         'aria-label', 
         `${string.label} string, fret ${fret}, ${button.textContent}`
     );
-    button.classList.toggle('highlight-primary',
-        selected.stringIndex === stringIndex && selected.fret === fret);
 
     button.addEventListener('click', () => {
         if (activeTabName() == tabNameNotes) {
-            clearFretHighlights();
-            button.classList.add('highlight-primary');
             selected = { stringIndex, fret };
 
-            highlightRelatedNotes(stringIndex, fret);
-            renderInfo();
+            const noteInfo = getSelectedNoteInfo();
+            renderNoteInfo(noteInfo);
+            renderFretboardHighlights(noteInfo);
         }
     });
     return button;
@@ -98,6 +109,18 @@ function clearFretHighlights() {
     });
 }
 
+function getSelectedNoteInfo() {
+    const string = guitar.strings[selected.stringIndex];
+    const note = guitar.getNoteAt(string, selected.fret);
+
+    return {
+        string,
+        fret: selected.fret,
+        note,
+        relatedNotes: getRelatedNotes(note)
+    };
+}
+
 function highlightFretPositions(positions, className) {
     positions.forEach((position) => {
         const button = findButton(position.string.stringNumber, position.fretNumber);
@@ -111,13 +134,27 @@ function markUnplayed(positions) {
     });
 }
 
-function highlightRelatedNotes(stringIndex, fret) {
-    const guitarString = guitar.strings[stringIndex];
-    const rootNote = guitar.getNoteAt(guitarString, fret);
-    const relatedFrets = guitar.getRelatedFrets(rootNote);
+function highlightRelatedNotes({ note, relatedNotes }) {
+    const relatedFrets = guitar.getRelatedFrets(note, relatedNotes);
 
     highlightFretPositions([ ...relatedFrets.majorThirds, ...relatedFrets.minorThirds ], 'highlight-secondary');
     highlightFretPositions(relatedFrets.perfectFifths, 'highlight-tertiary');
+}
+
+function highlightSelectedNote({ string, fret }) {
+    const button = findButton(string.stringNumber, fret);
+    button?.classList.add('highlight-primary');
+}
+
+function renderFretboardHighlights(noteInfo) {
+    clearFretHighlights();
+
+    if (activeTabName() === tabNameNotes) {
+        highlightSelectedNote(noteInfo);
+        highlightRelatedNotes(noteInfo);
+    } else if (activeTabName() === tabNameChords) {
+        highlightChord(chordSelect.value);
+    }
 }
 
 function highlightChord(chordId) {
@@ -132,29 +169,14 @@ function highlightChord(chordId) {
     
     chord.positions.forEach((position) => {
         const button = findButton(position.string.stringNumber, position.fretNumber);
-        switch (position.role) {
-            case 'Root':
-                button.classList.remove('note-unplayed');
-                button?.classList.add('highlight-primary');
-                break
-            case 'Major Third':
-            case 'Minor Third':
-                button.classList.remove('note-unplayed');
-                button?.classList.add('highlight-secondary');
-                break;
-            case 'Perfect fifth':
-                button.classList.remove('note-unplayed');
-                button?.classList.add('highlight-tertiary');
-                break;
-            default:
-                button.classList.remove('note-unplayed');
-                button?.classList.add('highlight-additional');
-                break;
-        }
+        button?.classList.remove('note-unplayed');
+        button?.classList.add(
+            intervalClassMap[position.interval] ?? 'highlight-additional'
+        );
     });
 }
 
-function renderFretboard(){
+function renderFretboard() {
     board.style.setProperty('--fret-column-count', guitar.fretCount + 1); 
     board.replaceChildren();
     addCell('String', 'label heading');
@@ -172,30 +194,28 @@ function renderFretboard(){
             cell.appendChild(button);
         }
     });
-
-    if (activeTabName() === tabNameNotes) {
-        highlightRelatedNotes(selected.stringIndex, selected.fret);
-    }
 }
 
 function describeNote(note) {
     return `${nameOfNote(note)} · ${note.frequency.toFixed(2)} Hz`;
 }
 
-function renderInfo() {
-    const string = guitar.strings[selected.stringIndex];
-    const note = guitar.getNoteAt(string, selected.fret);
-    const relatedNotes = getRelatedNotes(note);
+function renderNoteInfo({ string, fret, note, relatedNotes }) {
     selectedNote.textContent = describeNote(note);
-    selectedPosition.textContent = `${string.label} string · ${selected.fret === 0 ? 'open' : `fret ${selected.fret}`}`;
+    selectedPosition.textContent = `${string.label} string · ${fret === 0 ? 'open' : `fret ${fret}`}`;
     minorThird.textContent = describeNote(relatedNotes.minorThird);
     majorThird.textContent = describeNote(relatedNotes.majorThird);
     perfectFifth.textContent = describeNote(relatedNotes.perfectFifth);
 }
 
+function renderChordInfo() {
+}
+
 function render() {
+    const noteInfo = getSelectedNoteInfo();
     renderFretboard();
-    renderInfo();
+    renderNoteInfo(noteInfo);
+    renderFretboardHighlights(noteInfo);
 }
 
 showNotesAs.forEach((radioButton) => {
@@ -215,6 +235,7 @@ tabs.forEach((tab) => {
             });
 
             chordsPanel.hidden = activeTabName() !== tabNameChords
+            //chordsDetails.hidden = activeTabName() !== tabNameChords
             if (activeTabName() !== tabNameChords) {
                 chordSelect.value = '';
             }
@@ -223,6 +244,10 @@ tabs.forEach((tab) => {
             notesDetails.hidden = activeTabName() !== tabNameNotes
             if (activeTabName() === tabNameNotes) {
                 render();
+            } else if (activeTabName() === tabNameChords) {
+                const noteInfo = getSelectedNoteInfo();
+                renderNoteInfo(noteInfo);
+                renderFretboardHighlights(noteInfo);
             } else {
                 clearFretHighlights();
                 selected = defaultSelected;
@@ -232,8 +257,7 @@ tabs.forEach((tab) => {
 });
 
 chordSelect.addEventListener('change', () => {
-    clearFretHighlights();
-    highlightChord(chordSelect.value);
+    renderFretboardHighlights(getSelectedNoteInfo());
 });
 
 getChordNames().forEach((chordName) => {

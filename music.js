@@ -1,7 +1,11 @@
 const semitonesPerOctave = 12;
-const majorThirdSemitones = 4;
-const minorThirdSemitones = 3;
-const perfectFifthSemitones = 7;
+
+const intervals = Object.freeze({
+    unison: 0,
+    minorThird: 3,
+    majorThird: 4,
+    perfectFifth: 7
+});
 
 const noteNames = [
     { natural: 'C', sharp: null, flat: null },
@@ -56,31 +60,25 @@ function getRelatedNote(note, semitoneCount) {
 
 function getRelatedNotes(note) {
     return Object.freeze({
-        majorThird: getRelatedNote(note, majorThirdSemitones),
-        minorThird: getRelatedNote(note, minorThirdSemitones),
-        perfectFifth: getRelatedNote(note, perfectFifthSemitones)
+        majorThird: getRelatedNote(note, intervals.majorThird),
+        minorThird: getRelatedNote(note, intervals.minorThird),
+        perfectFifth: getRelatedNote(note, intervals.perfectFifth)
     });
 }
 
-const isSameNoteAnyOctave = (rootNote, note) =>
-    (note.midiNoteNumber - rootNote.midiNoteNumber) % semitonesPerOctave === 0;
+function getInterval(firstNote, secondNote) {
+    const distance =
+        secondNote.midiNoteNumber - firstNote.midiNoteNumber;
 
-const isMajorThirdAnyOctave = (rootNote, note) => 
-    (note.midiNoteNumber - rootNote.midiNoteNumber) %12 === majorThirdSemitones;
-
-const isMinorThirdAnyOctave = (rootNote, note) => 
-    (note.midiNoteNumber - rootNote.midiNoteNumber) %12 === minorThirdSemitones;
-
-const isPerfectFifthAnyOctave = (rootNote, note) => 
-    (note.midiNoteNumber - rootNote.midiNoteNumber) %12 === perfectFifthSemitones
-
-
-export { 
-    getNote,
-    getRelatedNotes,
-    isSameNoteAnyOctave,
-    isMajorThirdAnyOctave, 
-    isMinorThirdAnyOctave, 
-    isPerfectFifthAnyOctave 
+    return (
+        (distance % semitonesPerOctave) + semitonesPerOctave
+    ) % semitonesPerOctave;
 }
+
+export {
+    intervals,
+    getInterval,
+    getNote,
+    getRelatedNotes
+};
 
