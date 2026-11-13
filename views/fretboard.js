@@ -4,6 +4,9 @@ export function createFretboardView({
     fretCount,
     buttonClickCallback
 }) {
+
+    const getButtons = () => boardElement.querySelectorAll('.note');
+
     function build() {
         boardElement.style.setProperty('--fret-column-count', fretCount + 1);
         boardElement.replaceChildren();
@@ -76,9 +79,42 @@ export function createFretboardView({
         );
     }
 
+    function highlightPositions(positions, className) {
+        positions.forEach((position) => {
+            const button = findButton(position.stringNumber, position.fretNumber);
+            button?.classList.remove('note-unplayed');
+            button?.classList.add(className);
+        });
+    }
+
+    function clearHighlights() {
+        const classNames = [
+            'highlight-primary',
+            'highlight-secondary',
+            'highlight-tertiary',
+            'highlight-additional',
+            'note-unplayed'
+        ];
+        const classString = `.${classNames.join(', .')}`;
+        const previousButtons = boardElement.querySelectorAll(classString);
+
+        previousButtons.forEach((button) => {
+            button.classList.remove(...classNames);
+        });
+    }
+
+    function markUnplayed() {
+        const buttons = getButtons();
+        buttons.forEach((button) => {
+            button?.classList.add('note-unplayed');
+        });
+    }
+
     return {
         build,
-        findButton,
-        setNoteLabels
+        setNoteLabels,
+        highlightPositions,
+        clearHighlights,
+        markUnplayed
     }
 }

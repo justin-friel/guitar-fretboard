@@ -51,22 +51,6 @@ function getNoteName(note, sharpOrFlatName) {
     return noteName + note.octave;
 }
 
-function clearFretHighlights() {
-    const classNames = [
-        'highlight-primary',
-        'highlight-secondary',
-        'highlight-tertiary',
-        'highlight-additional',
-        'note-unplayed'
-    ];
-    const classString = `.${classNames.join(', .')}`;
-    const previousButtons = board.querySelectorAll(classString);
-
-    previousButtons.forEach((button) => {
-        button.classList.remove(...classNames);
-    });
-}
-
 function onPositionSelected({
     stringNumber,
     fretNumber
@@ -80,8 +64,16 @@ function onPositionSelected({
 function showSelectedNote() {
     const noteInfo = getSelectedNoteInfo(selected);
 
-    clearFretHighlights();
-    highlightSelectedNote(noteInfo);
+    fretboard.clearHighlights();
+    fretboard.highlightPositions(
+        [
+            {
+                stringNumber: selected.stringNumber,
+                fretNumber:selected.fretNumber
+            }
+        ],
+        'highlight-primary'
+    );
     highlightRelatedNotes(noteInfo);
     renderNoteInfo(noteInfo);
 }
@@ -100,50 +92,61 @@ function getSelectedNoteInfo({ stringNumber, fretNumber }) {
     };
 }
 
-function highlightFretPositions(positions, className) {
-    positions.forEach((position) => {
-        const button = fretboard.findButton(position.string.stringNumber, position.fretNumber);
-        button?.classList.add(className);
-    });
-}
-
-function markUnplayed(buttons) {
-    buttons.forEach((button) => {
-        button?.classList.add('note-unplayed');
-    });
-}
-
 function highlightRelatedNotes({ note, relatedNotes }) {
     const relatedFrets = guitar.getRelatedFrets(note, relatedNotes);
 
-    highlightFretPositions([ ...relatedFrets.majorThirds, ...relatedFrets.minorThirds ], 'highlight-secondary');
-    highlightFretPositions(relatedFrets.perfectFifths, 'highlight-tertiary');
-}
 
-function highlightSelectedNote({ string, fretNumber }) {
-    const button = fretboard.findButton(string.stringNumber, fretNumber);
-    button?.classList.add('highlight-primary');
+    const secondaryPositions = getRelatedPositions(
+        [...relatedFrets.majorThirds, ...relatedFrets.minorThirds]
+    );
+    const tertiaryPositions = getRelatedPositions(relatedFrets.perfectFifths);
+
+    fretboard.highlightPositions(secondaryPositions, 'highlight-secondary');
+    fretboard.highlightPositions(tertiaryPositions, 'highlight-tertiary');
+
+    function getRelatedPositions(relatedNotes) {
+        return relatedNotes.map((related) =>  {
+            return {
+                stringNumber: related.string.stringNumber,
+                fretNumber: related.fretNumber
+            };
+        });
+    }
 }
 
 function highlightChord(chordId) {
     const chord = guitar.getChord(chordId);
-    if (!chord) {
-        return;
-    }
+    if (chord) {
 
-    chord.positions.forEach((position) => {
-        const button = fretboard.findButton(position.string.stringNumber, position.fretNumber);
-        button?.classList.remove('note-unplayed');
-        button?.classList.add(
-            intervalClassMap[position.interval] ?? 'highlight-additional'
-        );
-    });
+        showSelectedChord();
+
+        const positions = chord.positions;
+        const root = filterPositions(positions, 0);
+        const majorThirds = filterPositions(positions, 4);
+        const minorThirds = filterPositions(positions, 3);
+        const perfectFifths = filterPositions(positions, 7);
+
+        function filterPositions(positions, intervalNumber) {
+            return positions.filter(
+                (position) =>  position.interval === intervalNumber
+            ).map(
+                (position) => {
+                    return {
+                        stringNumber: position.stringNumber,
+                        fretNumber: position.fretNumber
+                    };
+                }
+            );
+        }
+        fretboard.highlightPositions(root, 'highlight-primary');
+        fretboard.highlightPositions([...majorThirds, ...minorThirds], 'highlight-secondary');
+        fretboard.highlightPositions(perfectFifths, 'highlight-tertiary');
+    }
 }
 
 function showSelectedChord() {
-    const buttons = board.querySelectorAll('.note');
-    clearFretHighlights();
-    markUnplayed(buttons);
+    fretboard.clearHighlights();
+    fretboard.markUnplayed();
     if (chordSelect.value) {
         highlightChord(chordSelect.value);
     }
