@@ -117,9 +117,6 @@ function highlightRelatedNotes({ note, relatedNotes }) {
 function highlightChord(chordId) {
     const chord = guitar.getChord(chordId);
     if (chord) {
-
-        showSelectedChord();
-
         const positions = chord.positions;
         const root = filterPositions(positions, 0);
         const majorThirds = filterPositions(positions, 4);
