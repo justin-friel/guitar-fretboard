@@ -2,6 +2,7 @@ import { createGuitar } from "./guitar.js";
 import { intervals, getRelatedNotes } from "./music.js";
 import { getChordNames } from "./guitarChord.js";
 import { createFretboardView } from "./views/fretboard.js";
+import { createNoteDetailsView } from "./views/noteDetails.js";
 
 const guitar = createGuitar(21);
 const tabNameNotes = 'notes';
@@ -14,11 +15,6 @@ const notesDetails = document.getElementById('notes-details');
 const chordsDetails = document.getElementById('chords-details');
 const chordSelect = document.getElementById('chord-select');
 const showNotesAs = document.querySelectorAll('input[name="sharpsOrFlats"]');
-const selectedNote = document.getElementById('selected-note');
-const selectedPosition = document.getElementById('selected-position');
-const minorThird = document.getElementById('minor-third');
-const majorThird = document.getElementById('major-third');
-const perfectFifth = document.getElementById('perfect-fifth');
 const chordRelatedDetails = document.getElementById('chord-related-details');
 const defaultSelected = Object.freeze({ stringNumber: 6, fretNumber: 0 });
 let selected = { ...defaultSelected };
@@ -33,6 +29,9 @@ const fretboard = createFretboardView({
     guitarStrings: guitar.strings,
     fretCount: guitar.fretCount,
     buttonClickCallback: onPositionSelected
+});
+const notesDetailsView = createNoteDetailsView({
+    detailsElement: notesDetails
 });
 
 function getNoteType() {
@@ -65,7 +64,7 @@ function showSelectedNote() {
 
     fretboard.clearHighlights();
     highlightNotePositions(noteInfo);
-    renderNoteInfo(noteInfo);
+    setNoteInfo(noteInfo);
 }
 
 function getSelectedNoteInfo({ stringNumber, fretNumber }) {
@@ -122,12 +121,15 @@ function describeNote(note) {
     return `${getNoteName(note, sharpOrFlatName)} · ${note.frequency.toFixed(2)} Hz`;
 }
 
-function renderNoteInfo({ string, fretNumber, note, relatedNotes }) {
-    selectedNote.textContent = describeNote(note);
-    selectedPosition.textContent = `${string.label} string · ${fretNumber === 0 ? 'open' : `fret ${fretNumber}`}`;
-    minorThird.textContent = describeNote(relatedNotes.minorThird);
-    majorThird.textContent = describeNote(relatedNotes.majorThird);
-    perfectFifth.textContent = describeNote(relatedNotes.perfectFifth);
+function setNoteInfo({ string, fretNumber, note, relatedNotes }) {
+    const fretLabel = fretNumber === 0 ? 'open' : `fret ${fretNumber}`;
+    notesDetailsView.setDetails({
+        selectedNoteDetails: describeNote(note),
+        selectedPositionDetails: `${string.label} string · ${fretLabel}`,
+        majorThirdDetails: describeNote(relatedNotes.majorThird),
+        minorThirdDetails: describeNote(relatedNotes.minorThird),
+        perfectFifthDetails: describeNote(relatedNotes.perfectFifth)
+    });
 }
 
 showNotesAs.forEach((radioButton) => {
