@@ -65,8 +65,7 @@ function showSelectedNote() {
     const noteInfo = getSelectedNoteInfo(selected);
 
     fretboard.clearHighlights();
-    fretboard.highlightPosition(selected, 'highlight-primary');
-    highlightRelatedNotes(noteInfo);
+    highlightNotePositions(noteInfo);
     renderNoteInfo(noteInfo);
 }
 
@@ -94,7 +93,7 @@ function highlightPositionsByInterval(positions) {
     });
 }
 
-function highlightRelatedNotes({
+function highlightNotePositions({
     note,
     relatedNotes
 }) {

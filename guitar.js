@@ -28,7 +28,7 @@ export function createGuitar(numberOfFrets) {
     function getRelatedFrets(rootNote, relatedNotes) {
         relatedNotes ??= getRelatedNotes(rootNote);
         const relatedMidiNoteNumbers = new Set(
-            Object.values(relatedNotes).map(
+            [rootNote, ...Object.values(relatedNotes)].map(
                 (relatedNote) => relatedNote.midiNoteNumber
             )
         );
