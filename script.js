@@ -13,7 +13,6 @@ const chordsPanel = document.getElementById('chords-panel');
 const notesDetails = document.getElementById('notes-details');
 const chordsDetails = document.getElementById('chords-details');
 const chordSelect = document.getElementById('chord-select');
-const board = document.getElementById('fretboard');
 const showNotesAs = document.querySelectorAll('input[name="sharpsOrFlats"]');
 const selectedNote = document.getElementById('selected-note');
 const selectedPosition = document.getElementById('selected-position');
@@ -30,7 +29,7 @@ const intervalClassMap = Object.freeze({
     [intervals.perfectFifth]: 'highlight-tertiary'
 });
 const fretboard = createFretboardView({
-    boardElement: board,
+    boardElement: document.getElementById('fretboard'),
     guitarStrings: guitar.strings,
     fretCount: guitar.fretCount,
     buttonClickCallback: onPositionSelected
