@@ -64,7 +64,7 @@ function showSelectedNote() {
 
     fretboard.clearHighlights();
     highlightNotePositions(noteInfo);
-    setNoteInfo(noteInfo);
+    setNoteDetails(noteInfo);
 }
 
 function getSelectedNoteInfo({ stringNumber, fretNumber }) {
@@ -121,7 +121,7 @@ function describeNote(note) {
     return `${getNoteName(note, sharpOrFlatName)} · ${note.frequency.toFixed(2)} Hz`;
 }
 
-function setNoteInfo({ string, fretNumber, note, relatedNotes }) {
+function setNoteDetails({ string, fretNumber, note, relatedNotes }) {
     const fretLabel = fretNumber === 0 ? 'open' : `fret ${fretNumber}`;
     notesDetailsView.setDetails({
         selectedNoteDetails: describeNote(note),
