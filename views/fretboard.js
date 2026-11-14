@@ -79,12 +79,10 @@ export function createFretboardView({
         );
     }
 
-    function highlightPositions(positions, className) {
-        positions.forEach((position) => {
-            const button = findButton(position.stringNumber, position.fretNumber);
-            button?.classList.remove('note-unplayed');
-            button?.classList.add(className);
-        });
+    function highlightPosition({ stringNumber, fretNumber }, className) {
+        const button = findButton(stringNumber, fretNumber);
+        button?.classList.remove('note-unplayed');
+        button?.classList.add(className);
     }
 
     function clearHighlights() {
@@ -113,7 +111,7 @@ export function createFretboardView({
     return {
         build,
         setNoteLabels,
-        highlightPositions,
+        highlightPosition,
         clearHighlights,
         markUnplayed
     }

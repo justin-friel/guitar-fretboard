@@ -65,15 +65,7 @@ function showSelectedNote() {
     const noteInfo = getSelectedNoteInfo(selected);
 
     fretboard.clearHighlights();
-    fretboard.highlightPositions(
-        [
-            {
-                stringNumber: selected.stringNumber,
-                fretNumber:selected.fretNumber
-            }
-        ],
-        'highlight-primary'
-    );
+    fretboard.highlightPosition(selected, 'highlight-primary');
     highlightRelatedNotes(noteInfo);
     renderNoteInfo(noteInfo);
 }
@@ -92,52 +84,30 @@ function getSelectedNoteInfo({ stringNumber, fretNumber }) {
     };
 }
 
-function highlightRelatedNotes({ note, relatedNotes }) {
-    const relatedFrets = guitar.getRelatedFrets(note, relatedNotes);
+function highlightPositionsByInterval(positions) {
+    positions.forEach((position) => {
+        const className =
+            intervalClassMap[position.interval] ??
+            'highlight-additional';
 
+        fretboard.highlightPosition(position, className);
+    });
+}
 
-    const secondaryPositions = getRelatedPositions(
-        [...relatedFrets.majorThirds, ...relatedFrets.minorThirds]
-    );
-    const tertiaryPositions = getRelatedPositions(relatedFrets.perfectFifths);
+function highlightRelatedNotes({
+    note,
+    relatedNotes
+}) {
+    const relatedFrets =
+        guitar.getRelatedFrets(note, relatedNotes);
 
-    fretboard.highlightPositions(secondaryPositions, 'highlight-secondary');
-    fretboard.highlightPositions(tertiaryPositions, 'highlight-tertiary');
-
-    function getRelatedPositions(relatedNotes) {
-        return relatedNotes.map((related) =>  {
-            return {
-                stringNumber: related.string.stringNumber,
-                fretNumber: related.fretNumber
-            };
-        });
-    }
+    highlightPositionsByInterval(relatedFrets);
 }
 
 function highlightChord(chordId) {
     const chord = guitar.getChord(chordId);
     if (chord) {
-        const positions = chord.positions;
-        const root = filterPositions(positions, 0);
-        const majorThirds = filterPositions(positions, 4);
-        const minorThirds = filterPositions(positions, 3);
-        const perfectFifths = filterPositions(positions, 7);
-
-        function filterPositions(positions, intervalNumber) {
-            return positions.filter(
-                (position) =>  position.interval === intervalNumber
-            ).map(
-                (position) => {
-                    return {
-                        stringNumber: position.stringNumber,
-                        fretNumber: position.fretNumber
-                    };
-                }
-            );
-        }
-        fretboard.highlightPositions(root, 'highlight-primary');
-        fretboard.highlightPositions([...majorThirds, ...minorThirds], 'highlight-secondary');
-        fretboard.highlightPositions(perfectFifths, 'highlight-tertiary');
+        highlightPositionsByInterval(chord.positions);
     }
 }
 

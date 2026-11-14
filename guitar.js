@@ -25,38 +25,36 @@ export function createGuitar(numberOfFrets) {
         return getNote(midiNoteNumber);
     }
 
-    function getRelatedFrets(note, relatedNotes) {
-        relatedNotes ??= getRelatedNotes(note);
-        const majorThirds = [];
-        const minorThirds = [];
-        const perfectFifths = [];
-        standardTuning.forEach(string => {
+    function getRelatedFrets(rootNote, relatedNotes) {
+        relatedNotes ??= getRelatedNotes(rootNote);
+        const relatedMidiNoteNumbers = new Set(
+            Object.values(relatedNotes).map(
+                (relatedNote) => relatedNote.midiNoteNumber
+            )
+        );
+        const relatedFrets = [];
+
+        standardTuning.forEach((string) => {
             for (let fret = 0; fret <= fretCount; fret++) {
-                const note = getNoteAt(string, fret);
-                if (note.midiNoteNumber === relatedNotes.majorThird.midiNoteNumber) {
-                    majorThirds.push(Object.freeze({
-                        string,
+                const currentNote = getNoteAt(string, fret);
+                if (relatedMidiNoteNumbers.has(currentNote.midiNoteNumber)) {
+                    const position = {
+                        stringNumber: string.stringNumber,
                         fretNumber: fret
-                    }));
-                } else if (note.midiNoteNumber === relatedNotes.minorThird.midiNoteNumber) {
-                    minorThirds.push(Object.freeze({
-                        string,
-                        fretNumber: fret
-                    }));
-                } else if (note.midiNoteNumber === relatedNotes.perfectFifth.midiNoteNumber) {
-                    perfectFifths.push(Object.freeze({
-                        string,
-                        fretNumber: fret
-                    }));
+                    };
+                    relatedFrets.push(
+                        mapPosition(
+                            position,
+                            string,
+                            currentNote,
+                            rootNote
+                        )
+                    );
                 }
             }
         });
 
-        return Object.freeze({
-            majorThirds: Object.freeze(majorThirds),
-            minorThirds: Object.freeze(minorThirds),
-            perfectFifths: Object.freeze(perfectFifths)
-        });
+        return Object.freeze(relatedFrets);
     }
 
     function getChord(chordId) {
