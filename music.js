@@ -1,84 +1,72 @@
 const semitonesPerOctave = 12;
 
 const intervals = Object.freeze({
-    unison: 0,
-    minorThird: 3,
-    majorThird: 4,
-    perfectFifth: 7
+	unison: 0,
+	minorThird: 3,
+	majorThird: 4,
+	perfectFifth: 7
 });
 
 const noteNames = [
-    { natural: 'C', sharp: null, flat: null },
-    { natural: null, sharp: 'C♯', flat: 'D♭' },
-    { natural: 'D', sharp: null, flat: null },
-    { natural: null, sharp: 'D♯', flat: 'E♭' },
-    { natural: 'E', sharp: null, flat: null },
-    { natural: 'F', sharp: null, flat: null },
-    { natural: null, sharp: 'F♯', flat: 'G♭' },
-    { natural: 'G', sharp: null, flat: null },
-    { natural: null, sharp: 'G♯', flat: 'A♭' },
-    { natural: 'A', sharp: null, flat: null },
-    { natural: null, sharp: 'A♯', flat: 'B♭' },
-    { natural: 'B', sharp: null, flat: null }
-].map(names => Object.freeze(names));
+	{ natural: 'C', sharp: null, flat: null },
+	{ natural: null, sharp: 'C♯', flat: 'D♭' },
+	{ natural: 'D', sharp: null, flat: null },
+	{ natural: null, sharp: 'D♯', flat: 'E♭' },
+	{ natural: 'E', sharp: null, flat: null },
+	{ natural: 'F', sharp: null, flat: null },
+	{ natural: null, sharp: 'F♯', flat: 'G♭' },
+	{ natural: 'G', sharp: null, flat: null },
+	{ natural: null, sharp: 'G♯', flat: 'A♭' },
+	{ natural: 'A', sharp: null, flat: null },
+	{ natural: null, sharp: 'A♯', flat: 'B♭' },
+	{ natural: 'B', sharp: null, flat: null }
+].map((names) => Object.freeze(names));
 
 function createNote(midiNoteNumber, frequency) {
-    const noteIndex =
-        midiNoteNumber % semitonesPerOctave;
+	const noteIndex = midiNoteNumber % semitonesPerOctave;
 
-    const octave =
-        Math.floor(midiNoteNumber / semitonesPerOctave) - 1;
+	const octave = Math.floor(midiNoteNumber / semitonesPerOctave) - 1;
 
-    return Object.freeze({
-        midiNoteNumber,
-        octave,
-        frequency,
-        names: noteNames[noteIndex]
-    });
+	return Object.freeze({
+		midiNoteNumber,
+		octave,
+		frequency,
+		names: noteNames[noteIndex]
+	});
 }
 
 const referenceNote = createNote(69, 440);
 
 function getNote(midiNoteNumber) {
+	const semitoneDistance = midiNoteNumber - referenceNote.midiNoteNumber;
 
-    const semitoneDistance =
-        midiNoteNumber - referenceNote.midiNoteNumber;
+	const octaveDistance = semitoneDistance / semitonesPerOctave;
 
-    const octaveDistance =
-        semitoneDistance / semitonesPerOctave;
+	const frequency = referenceNote.frequency * Math.pow(2, octaveDistance);
 
-    const frequency =
-        referenceNote.frequency * Math.pow(2, octaveDistance);
-
-    return createNote(midiNoteNumber, frequency);
+	return createNote(midiNoteNumber, frequency);
 }
 
 function getRelatedNote(note, semitoneCount) {
-    const relatedNoteNumber = note.midiNoteNumber + semitoneCount;
-    return getNote(relatedNoteNumber);
+	const relatedNoteNumber = note.midiNoteNumber + semitoneCount;
+	return getNote(relatedNoteNumber);
 }
 
 function getRelatedNotes(note) {
-    return Object.freeze({
-        majorThird: getRelatedNote(note, intervals.majorThird),
-        minorThird: getRelatedNote(note, intervals.minorThird),
-        perfectFifth: getRelatedNote(note, intervals.perfectFifth)
-    });
+	return Object.freeze({
+		majorThird: getRelatedNote(note, intervals.majorThird),
+		minorThird: getRelatedNote(note, intervals.minorThird),
+		perfectFifth: getRelatedNote(note, intervals.perfectFifth)
+	});
 }
 
 function getInterval(firstNote, secondNote) {
-    const distance =
-        secondNote.midiNoteNumber - firstNote.midiNoteNumber;
+	const distance = secondNote.midiNoteNumber - firstNote.midiNoteNumber;
 
-    return (
-        (distance % semitonesPerOctave) + semitonesPerOctave
-    ) % semitonesPerOctave;
+	return (
+		((distance % semitonesPerOctave) + semitonesPerOctave) %
+		semitonesPerOctave
+	);
 }
 
-export {
-    intervals,
-    getInterval,
-    getNote,
-    getRelatedNotes
-};
-
+export { intervals, getInterval, getNote, getRelatedNotes };

@@ -1,0 +1,27 @@
+{
+	"name": "guitar-fretboard",
+	"version": "1.0.0",
+	"description": "A small app for exploring the layout of guitar fretboards.",
+	"scripts": {
+		"lint": "eslint .",
+		"format": "prettier --write \"**/*.{js,mjs}\"",
+		"format:check": "prettier --check \"**/*.{js,mjs}\""
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/justin-friel/guitar-fretboard.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "MIT",
+	"type": "module",
+	"homepage": "https://justin-friel.github.io/guitar-fretboard",
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"eslint": "^10.15.0",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-prettier": "^5.5.7",
+		"globals": "^17.14.0",
+		"prettier": "^3.10.1"
+	}
+}

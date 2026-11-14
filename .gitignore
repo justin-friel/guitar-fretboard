@@ -8,3 +8,6 @@ Desktop.ini
 *.swp
 *.swo
 *~
+
+# Node/NPM
+node_modules/
