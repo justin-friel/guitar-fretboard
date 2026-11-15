@@ -4,6 +4,7 @@ import { getChordNames } from './guitarChord.js';
 import { createFretboardView } from './views/fretboard.js';
 import { createNoteDetailsView } from './views/noteDetails.js';
 import { createTabsView } from './views/tabs.js';
+import { createNoteOptionsView } from './views/noteOptions.js';
 
 const guitar = createGuitar(21);
 const tabNameNotes = 'notes';
@@ -13,7 +14,6 @@ const chordsPanel = document.getElementById('chords-panel');
 const notesDetails = document.getElementById('notes-details');
 const chordsDetails = document.getElementById('chords-details');
 const chordSelect = document.getElementById('chord-select');
-const showNotesAs = document.querySelectorAll('input[name="sharpsOrFlats"]');
 const chordRelatedDetails = document.getElementById('chord-related-details');
 const defaultSelected = Object.freeze({ stringNumber: 6, fretNumber: 0 });
 let selected = { ...defaultSelected };
@@ -36,15 +36,14 @@ const tabsView = createTabsView({
 	tabsElement: document.getElementById('tabs'),
 	tabSelectedCallback: onTabSelected
 });
+const noteOptionsView = createNoteOptionsView({
+	optionsElement: notesPanel,
+	optionSelectedCallback: onNoteOptionChanged
+});
 
-function getNoteType() {
-	let noteType = 'sharp';
-	showNotesAs.forEach((radio) => {
-		if (radio.checked) {
-			noteType = radio.value;
-		}
-	});
-	return noteType;
+function onNoteOptionChanged(selectedValue) {
+	setFretboardLabels(selectedValue);
+	showSelectedNote();
 }
 
 function getNoteName(note, sharpOrFlatName) {
@@ -92,7 +91,6 @@ function highlightPositionsByInterval(positions) {
 
 function highlightNotePositions({ note, relatedNotes }) {
 	const relatedFrets = guitar.getRelatedFrets(note, relatedNotes);
-
 	highlightPositionsByInterval(relatedFrets);
 }
 
@@ -112,7 +110,7 @@ function showSelectedChord() {
 }
 
 function describeNote(note) {
-	const sharpOrFlatName = getNoteType();
+	const sharpOrFlatName = noteOptionsView.getSelectedOption();
 	return `${getNoteName(note, sharpOrFlatName)} · ${note.frequency.toFixed(2)} Hz`;
 }
 
@@ -126,13 +124,6 @@ function setNoteDetails({ string, fretNumber, note, relatedNotes }) {
 		perfectFifthDetails: describeNote(relatedNotes.perfectFifth)
 	});
 }
-
-showNotesAs.forEach((radioButton) => {
-	radioButton.addEventListener('change', () => {
-		setFretboardLabels();
-		showSelectedNote();
-	});
-});
 
 function onTabSelected(tabName) {
 	setTabVisibility(tabName);
@@ -162,9 +153,8 @@ getChordNames().forEach((chordName) => {
 	chordSelect.appendChild(option);
 });
 
-function setFretboardLabels() {
+function setFretboardLabels(noteType) {
 	const labels = [];
-	const noteType = getNoteType();
 	guitar.strings.forEach((guitarString) => {
 		for (let fretNumber = 0; fretNumber <= guitar.fretCount; fretNumber++) {
 			const note = guitar.getNoteAt(guitarString, fretNumber);
@@ -180,7 +170,7 @@ function setFretboardLabels() {
 }
 
 fretboard.build();
-setFretboardLabels();
+setFretboardLabels(noteOptionsView.getSelectedOption());
 showSelectedNote();
 
 const requestedTab = new URLSearchParams(window.location.search).get('tab');
