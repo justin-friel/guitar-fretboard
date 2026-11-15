@@ -5,6 +5,7 @@ import { createFretboardView } from './views/fretboard.js';
 import { createNoteDetailsView } from './views/noteDetails.js';
 import { createTabsView } from './views/tabs.js';
 import { createNoteOptionsView } from './views/noteOptions.js';
+import { createChordSelectView } from './views/chordSelect.js';
 
 const guitar = createGuitar(21);
 const tabNameNotes = 'notes';
@@ -13,7 +14,6 @@ const notesPanel = document.getElementById('notes-panel');
 const chordsPanel = document.getElementById('chords-panel');
 const notesDetails = document.getElementById('notes-details');
 const chordsDetails = document.getElementById('chords-details');
-const chordSelect = document.getElementById('chord-select');
 const chordRelatedDetails = document.getElementById('chord-related-details');
 const defaultSelected = Object.freeze({ stringNumber: 6, fretNumber: 0 });
 let selected = { ...defaultSelected };
@@ -39,6 +39,10 @@ const tabsView = createTabsView({
 const noteOptionsView = createNoteOptionsView({
 	optionsElement: notesPanel,
 	optionSelectedCallback: onNoteOptionChanged
+});
+const chordSelectView = createChordSelectView({
+	chordContainerElement: chordsPanel,
+	optionSelectedCallback: showSelectedChord
 });
 
 function onNoteOptionChanged(selectedValue) {
@@ -101,11 +105,11 @@ function highlightChord(chordId) {
 	}
 }
 
-function showSelectedChord() {
+function showSelectedChord(chordId) {
 	fretboard.clearHighlights();
 	fretboard.markUnplayed();
-	if (chordSelect.value) {
-		highlightChord(chordSelect.value);
+	if (chordId) {
+		highlightChord(chordId);
 	}
 }
 
@@ -132,7 +136,8 @@ function onTabSelected(tabName) {
 		showSelectedNote();
 	}
 	if (tabName === tabNameChords) {
-		showSelectedChord();
+		const selectedChordId = chordSelectView.getValue();
+		showSelectedChord(selectedChordId);
 	}
 }
 
@@ -141,17 +146,6 @@ function setTabVisibility(tabName) {
 	notesDetails.hidden = tabName !== tabNameNotes;
 	chordsPanel.hidden = tabName !== tabNameChords;
 }
-
-chordSelect.addEventListener('change', () => {
-	showSelectedChord();
-});
-
-getChordNames().forEach((chordName) => {
-	const option = document.createElement('option');
-	option.value = chordName.key;
-	option.textContent = chordName.name;
-	chordSelect.appendChild(option);
-});
 
 function setFretboardLabels(noteType) {
 	const labels = [];
@@ -171,6 +165,7 @@ function setFretboardLabels(noteType) {
 
 fretboard.build();
 setFretboardLabels(noteOptionsView.getSelectedOption());
+chordSelectView.buildOptions(getChordNames());
 showSelectedNote();
 
 const requestedTab = new URLSearchParams(window.location.search).get('tab');
