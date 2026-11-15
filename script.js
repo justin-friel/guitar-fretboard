@@ -3,12 +3,11 @@ import { intervals, getRelatedNotes } from './music.js';
 import { getChordNames } from './guitarChord.js';
 import { createFretboardView } from './views/fretboard.js';
 import { createNoteDetailsView } from './views/noteDetails.js';
+import { createTabsView } from './views/tabs.js';
 
 const guitar = createGuitar(21);
 const tabNameNotes = 'notes';
 const tabNameChords = 'chords';
-const tabs = document.querySelectorAll('.tab');
-const activeTabName = () => document.querySelector('.tab.active')?.dataset.tab;
 const notesPanel = document.getElementById('notes-panel');
 const chordsPanel = document.getElementById('chords-panel');
 const notesDetails = document.getElementById('notes-details');
@@ -33,6 +32,10 @@ const fretboard = createFretboardView({
 const notesDetailsView = createNoteDetailsView({
 	detailsElement: notesDetails
 });
+const tabsView = createTabsView({
+	tabsElement: document.getElementById('tabs'),
+	tabSelectedCallback: onTabSelected
+});
 
 function getNoteType() {
 	let noteType = 'sharp';
@@ -50,7 +53,7 @@ function getNoteName(note, sharpOrFlatName) {
 }
 
 function onPositionSelected({ stringNumber, fretNumber }) {
-	if (activeTabName() === tabNameNotes) {
+	if (tabsView.getActiveTabName() === tabNameNotes) {
 		selected = { stringNumber, fretNumber };
 		showSelectedNote();
 	}
@@ -131,32 +134,17 @@ showNotesAs.forEach((radioButton) => {
 	});
 });
 
-tabs.forEach((tab) => {
-	tab.addEventListener('click', () => {
-		const nextTabName = tab.dataset.tab;
-		selectTab(nextTabName);
-	});
-});
+function onTabSelected(tabName) {
+	setTabVisibility(tabName);
 
-function selectTab(tabName) {
-	if (activeTabName() !== tabName) {
-		setActiveTab(tabName);
-		setTabVisibility(tabName);
-
-		if (tabName === tabNameNotes) {
-			showSelectedNote();
-		}
-		if (tabName === tabNameChords) {
-			showSelectedChord();
-		}
+	if (tabName === tabNameNotes) {
+		showSelectedNote();
+	}
+	if (tabName === tabNameChords) {
+		showSelectedChord();
 	}
 }
 
-function setActiveTab(tabName) {
-	tabs.forEach((tab) => {
-		tab.classList.toggle('active', tab.dataset.tab === tabName);
-	});
-}
 function setTabVisibility(tabName) {
 	notesPanel.hidden = tabName !== tabNameNotes;
 	notesDetails.hidden = tabName !== tabNameNotes;
@@ -196,6 +184,4 @@ setFretboardLabels();
 showSelectedNote();
 
 const requestedTab = new URLSearchParams(window.location.search).get('tab');
-if (requestedTab === tabNameNotes || requestedTab === tabNameChords) {
-	selectTab(requestedTab);
-}
+tabsView.setActiveTab(requestedTab);
