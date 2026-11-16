@@ -19,7 +19,12 @@ export function createNoteDetailsView({ detailsElement }) {
 		perfectFifth.textContent = perfectFifthDetails;
 	}
 
+	const setVisible = (isVisible) => {
+		detailsElement.hidden = !isVisible;
+	};
+
 	return {
-		setDetails
+		setDetails,
+		setVisible
 	};
 }

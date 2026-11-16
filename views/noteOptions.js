@@ -17,7 +17,12 @@ export function createNoteOptionsView({
 	const getSelectedOption = () =>
 		noteOptions.find((option) => option.checked)?.value;
 
+	const setVisible = (isVisible) => {
+		optionsElement.hidden = !isVisible;
+	};
+
 	return {
-		getSelectedOption
+		getSelectedOption,
+		setVisible
 	};
 }

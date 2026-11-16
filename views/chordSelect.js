@@ -23,8 +23,13 @@ export function createChordSelectView({
 		optionSelectedCallback(selectedValue);
 	}
 
+	const setVisible = (isVisible) => {
+		chordContainerElement.hidden = !isVisible;
+	};
+
 	return {
 		buildOptions,
-		getValue
+		getValue,
+		setVisible
 	};
 }

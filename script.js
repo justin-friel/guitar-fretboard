@@ -10,9 +10,6 @@ import { createChordSelectView } from './views/chordSelect.js';
 const guitar = createGuitar(21);
 const tabNameNotes = 'notes';
 const tabNameChords = 'chords';
-const notesPanel = document.getElementById('notes-panel');
-const chordsPanel = document.getElementById('chords-panel');
-const notesDetails = document.getElementById('notes-details');
 const chordsDetails = document.getElementById('chords-details');
 const chordRelatedDetails = document.getElementById('chord-related-details');
 const defaultSelected = Object.freeze({ stringNumber: 6, fretNumber: 0 });
@@ -30,18 +27,18 @@ const fretboard = createFretboardView({
 	buttonClickCallback: onPositionSelected
 });
 const notesDetailsView = createNoteDetailsView({
-	detailsElement: notesDetails
+	detailsElement: document.getElementById('notes-details')
 });
 const tabsView = createTabsView({
 	tabsElement: document.getElementById('tabs'),
 	tabSelectedCallback: onTabSelected
 });
 const noteOptionsView = createNoteOptionsView({
-	optionsElement: notesPanel,
+	optionsElement: document.getElementById('notes-panel'),
 	optionSelectedCallback: onNoteOptionChanged
 });
 const chordSelectView = createChordSelectView({
-	chordContainerElement: chordsPanel,
+	chordContainerElement: document.getElementById('chords-panel'),
 	optionSelectedCallback: showSelectedChord
 });
 
@@ -142,9 +139,9 @@ function onTabSelected(tabName) {
 }
 
 function setTabVisibility(tabName) {
-	notesPanel.hidden = tabName !== tabNameNotes;
-	notesDetails.hidden = tabName !== tabNameNotes;
-	chordsPanel.hidden = tabName !== tabNameChords;
+	noteOptionsView.setVisible(tabName === tabNameNotes);
+	notesDetailsView.setVisible(tabName === tabNameNotes);
+	chordSelectView.setVisible(tabName === tabNameChords);
 }
 
 function setFretboardLabels(noteType) {
