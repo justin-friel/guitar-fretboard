@@ -6,12 +6,11 @@ import { createNoteDetailsView } from './views/noteDetails.js';
 import { createTabsView } from './views/tabs.js';
 import { createNoteOptionsView } from './views/noteOptions.js';
 import { createChordSelectView } from './views/chordSelect.js';
+import { createChordDetailsView } from './views/chordDetails.js';
 
 const guitar = createGuitar(21);
 const tabNameNotes = 'notes';
 const tabNameChords = 'chords';
-const chordsDetails = document.getElementById('chords-details');
-const chordRelatedDetails = document.getElementById('chord-related-details');
 const defaultSelected = Object.freeze({ stringNumber: 6, fretNumber: 0 });
 let selected = { ...defaultSelected };
 const intervalClassMap = Object.freeze({
@@ -41,6 +40,10 @@ const chordSelectView = createChordSelectView({
 	chordContainerElement: document.getElementById('chords-panel'),
 	optionSelectedCallback: showSelectedChord
 });
+
+const chordDetailsView = createChordDetailsView(
+	document.getElementById('chords-details')
+);
 
 function onNoteOptionChanged(selectedValue) {
 	setFretboardLabels(selectedValue);
@@ -95,18 +98,32 @@ function highlightNotePositions({ note, relatedNotes }) {
 	highlightPositionsByInterval(relatedFrets);
 }
 
-function highlightChord(chordId) {
-	const chord = guitar.getChord(chordId);
-	if (chord) {
-		highlightPositionsByInterval(chord.positions);
-	}
+function highlightChord(chord) {
+	highlightPositionsByInterval(chord.positions);
 }
 
 function showSelectedChord(chordId) {
 	fretboard.clearHighlights();
 	fretboard.markUnplayed();
-	if (chordId) {
-		highlightChord(chordId);
+	chordDetailsView.clearRelatedNotes();
+	const chord = guitar.getChord(chordId);
+	if (chord) {
+		highlightChord(chord);
+		const chordIntervals = {
+			[intervals.unison]: { name: 'Roots', values: [] },
+			[intervals.majorThird]: { name: 'Major Thirds', values: [] },
+			[intervals.minorThird]: { name: 'Minor Thirds', values: [] },
+			[intervals.perfectFifth]: { name: 'Perfect Fifths', values: [] }
+		};
+		chord.positions.forEach((position) => {
+			const description = describeNote(position.note);
+			chordIntervals[position.interval].values.push(description);
+		});
+
+		chordDetailsView.setDetails({
+			name: chord.name,
+			toneGroups: chordIntervals
+		});
 	}
 }
 
@@ -142,6 +159,7 @@ function setTabVisibility(tabName) {
 	noteOptionsView.setVisible(tabName === tabNameNotes);
 	notesDetailsView.setVisible(tabName === tabNameNotes);
 	chordSelectView.setVisible(tabName === tabNameChords);
+	chordDetailsView.setVisible(tabName === tabNameChords);
 }
 
 function setFretboardLabels(noteType) {

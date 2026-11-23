@@ -74,6 +74,7 @@ export function createGuitar(numberOfFrets) {
 
 		return Object.freeze({
 			rootNote,
+			name: rawPositions.name,
 			positions
 		});
 	}

@@ -203,10 +203,48 @@ input {
     margin: 0;
 }
 
+.chord-details {
+	grid-template-columns: minmax(10rem, max-content) minmax(0, 1fr);
+	width: min(100%, 840px);
+	margin-inline: auto;
+}
+
+.chord-tone-groups {
+	margin: 10px 0 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 12px;
+}
+
+.tone-group {
+	padding: 12px;
+	border: 1px solid #d9dce0;
+	border-radius: 6px;
+}
+
+.tone-group h3 {
+	margin: 0 0 8px;
+	font-size: .9rem;
+}
+
+.tone-group ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.tone-group li + li {
+	margin-top: 4px;
+}
+
 @media (max-width: 600px) {
     .details {
         grid-template-columns: minmax(0, max-content);
     }
+
+	.chord-details {
+		grid-template-columns: minmax(0, 1fr);
+	}
 }
 
 .details small {
@@ -216,7 +254,8 @@ input {
     letter-spacing: .07em
 }
 
-#selected-note {
+#selected-note,
+#chord-name {
     font-size: clamp(1.75rem, 3.5vw, 2.25rem);
     font-weight: 700;
     margin: 6px 0
@@ -257,6 +296,10 @@ footer {
     .cell {
         border-color: #41464d
     }
+
+	.tone-group {
+		border-color: #41464d;
+	}
 
     .label,
     .heading {
