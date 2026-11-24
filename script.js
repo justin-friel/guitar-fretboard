@@ -1,5 +1,5 @@
 import { createGuitar } from './guitar.js';
-import { intervals, getRelatedNotes } from './music.js';
+import { intervals, getIntervalNames, getRelatedNotes } from './music.js';
 import { getChordNames } from './guitarChord.js';
 import { createFretboardView } from './views/fretboard.js';
 import { createNoteDetailsView } from './views/noteDetails.js';
@@ -109,20 +109,22 @@ function showSelectedChord(chordId) {
 	const chord = guitar.getChord(chordId);
 	if (chord) {
 		highlightChord(chord);
-		const chordIntervals = {
-			[intervals.unison]: { name: 'Roots', values: [] },
-			[intervals.majorThird]: { name: 'Major Thirds', values: [] },
-			[intervals.minorThird]: { name: 'Minor Thirds', values: [] },
-			[intervals.perfectFifth]: { name: 'Perfect Fifths', values: [] }
-		};
+
+		const toneGroups = {};
 		chord.positions.forEach((position) => {
-			const description = describeNote(position.note);
-			chordIntervals[position.interval].values.push(description);
+			toneGroups[position.interval] ??= {
+				name: getIntervalNames(position.interval).plural,
+				values: []
+			};
+
+			toneGroups[position.interval].values.push(
+				describeNote(position.note)
+			);
 		});
 
 		chordDetailsView.setDetails({
 			name: chord.name,
-			toneGroups: chordIntervals
+			toneGroups
 		});
 	}
 }
